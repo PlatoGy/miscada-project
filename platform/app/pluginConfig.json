@@ -80,6 +80,9 @@
       "packageName": "@ohif/mode-preclinical-4d"
     },
     {
+      "packageName": "@ohif/mode-unsam"
+    },
+    {
       "packageName": "@ohif/mode-test",
       "default": false,
       "version": "3.0.0"
