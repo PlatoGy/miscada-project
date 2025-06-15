@@ -4,6 +4,7 @@ import { Toolbox } from '@ohif/extension-default';
 import PanelSegmentation from './panels/PanelSegmentation';
 import ActiveViewportWindowLevel from './components/ActiveViewportWindowLevel';
 import PanelMeasurement from './panels/PanelMeasurement';
+import PanelUnSAM from './panels/PanelUnSAM';
 
 const getPanelModule = ({ commandsManager, servicesManager, extensionManager }: withAppTypes) => {
   const wrappedPanelSegmentation = ({ configuration }) => {
@@ -53,6 +54,19 @@ const getPanelModule = ({ commandsManager, servicesManager, extensionManager }: 
     );
   };
 
+  const wrappedPanelUnSAM = ({ configuration }) => {
+    return (
+      <PanelUnSAM
+        commandsManager={commandsManager}
+        servicesManager={servicesManager}
+        extensionManager={extensionManager}
+        configuration={{
+          ...configuration,
+        }}
+      />
+    );
+  };
+
   return [
     {
       name: 'activeViewportWindowLevel',
@@ -87,6 +101,13 @@ const getPanelModule = ({ commandsManager, servicesManager, extensionManager }: 
       iconLabel: 'Segmentation',
       label: 'Segmentation',
       component: wrappedPanelSegmentationWithTools,
+    },
+    {
+      name: 'panelUnSAM',
+      iconName: 'tab-unsam',
+      iconLabel: 'UnSAM',
+      label: 'UnSAM',
+      component: wrappedPanelUnSAM,
     },
   ];
 };

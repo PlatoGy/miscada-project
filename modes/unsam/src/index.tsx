@@ -6,17 +6,32 @@ import toolbarButtons from './toolbarButtons';
 const ohif = {
   layout: '@ohif/extension-default.layoutTemplateModule.viewerLayout',
   sopClassHandler: '@ohif/extension-default.sopClassHandlerModule.stack',
-  thumbnailList: '@ohif/extension-default.panelModule.seriesList',
+  hangingProtocol: '@ohif/extension-default.hangingProtocolModule.default',
+  leftPanel: '@ohif/extension-default.panelModule.seriesList',
 };
 
 const cornerstone = {
   viewport: '@ohif/extension-cornerstone.viewportModule.cornerstone',
-  unsam: '@ohif/extension-cornerstone.panelModule.panelUnSAM',
+  panelTool: '@ohif/extension-cornerstone.panelModule.panelSegmentationWithTools',
+  measurements: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
+  // unsam: '@ohif/extension-cornerstone.panelModule.panelUnSAM',
+};
+
+const segmentation = {
+  sopClassHandler: '@ohif/extension-cornerstone-dicom-seg.sopClassHandlerModule.dicom-seg',
+  viewport: '@ohif/extension-cornerstone-dicom-seg.viewportModule.dicom-seg',
+};
+
+const dicomRT = {
+  viewport: '@ohif/extension-cornerstone-dicom-rt.viewportModule.dicom-rt',
+  sopClassHandler: '@ohif/extension-cornerstone-dicom-rt.sopClassHandlerModule.dicom-rt',
 };
 
 const extensionDependencies = {
   '@ohif/extension-default': '^3.0.0',
   '@ohif/extension-cornerstone': '^3.0.0',
+  '@ohif/extension-cornerstone-dicom-seg': '^3.0.0',
+  '@ohif/extension-cornerstone-dicom-rt': '^3.0.0',
 };
 
 function modeFactory({ modeConfiguration }) {
@@ -28,7 +43,9 @@ function modeFactory({ modeConfiguration }) {
      * Lifecycle hooks
      */
     onModeEnter: ({ servicesManager, extensionManager, commandsManager }) => {
-      const { toolbarService, toolGroupService } = servicesManager.services;
+      const { measurementService, toolbarService, toolGroupService } = servicesManager.services;
+
+      measurementService.clearMeasurements();
 
       // Init Default ToolGroup
       initToolGroups(extensionManager, toolGroupService, commandsManager);
@@ -36,25 +53,100 @@ function modeFactory({ modeConfiguration }) {
       // Init Toolbars
       toolbarService.register(toolbarButtons);
       toolbarService.updateSection(toolbarService.sections.primary, [
-        'Zoom',
-        'Pan',
         'WindowLevel',
+        'Pan',
+        'Zoom',
+        'TrackballRotate',
+        'Capture',
         'Layout',
+        'Crosshairs',
+        'MoreTools',
       ]);
+      toolbarService.updateSection(toolbarService.sections.viewportActionMenu.topLeft, [
+        'orientationMenu',
+        'dataOverlayMenu',
+      ]);
+
+      toolbarService.updateSection(toolbarService.sections.viewportActionMenu.bottomMiddle, [
+        'AdvancedRenderingControls',
+      ]);
+
+      toolbarService.updateSection('AdvancedRenderingControls', [
+        'windowLevelMenuEmbedded',
+        'voiManualControlMenu',
+        'Colorbar',
+        'opacityMenu',
+        'thresholdMenu',
+      ]);
+
+      toolbarService.updateSection(toolbarService.sections.viewportActionMenu.topRight, [
+        'modalityLoadBadge',
+        'trackingStatus',
+        'navigationComponent',
+      ]);
+
+      toolbarService.updateSection(toolbarService.sections.viewportActionMenu.bottomLeft, [
+        'windowLevelMenu',
+      ]);
+
+      toolbarService.updateSection('MoreTools', [
+        'Reset',
+        'rotate-right',
+        'flipHorizontal',
+        'ReferenceLines',
+        'ImageOverlayViewer',
+        'StackScroll',
+        'invert',
+        'Cine',
+        'Magnify',
+        'TagBrowser',
+      ]);
+
+      toolbarService.updateSection(toolbarService.sections.segmentationToolbox, [
+        'SegmentationUtilities',
+        'SegmentationTools',
+      ]);
+      toolbarService.updateSection('SegmentationUtilities', [
+        // 'LabelmapSlicePropagation',
+        // 'InterpolateLabelmap',
+        // 'SegmentBidirectional',
+      ]);
+      toolbarService.updateSection('SegmentationTools', [
+        // 'BrushTools',
+        // 'MarkerLabelmap',
+        // 'RegionSegmentPlus',
+        // 'Shapes',
+      ]);
+      toolbarService.updateSection('BrushTools', ['Brush', 'Eraser', 'Threshold']);
     },
     onModeExit: ({ servicesManager }) => {
-      const { toolGroupService, uiDialogService, uiModalService } = servicesManager.services;
+      const { 
+        toolGroupService,
+        syncGroupService,
+        segmentationService,
+        cornerstoneViewportService,
+        uiDialogService,
+        uiModalService,
+       } = servicesManager.services;
+      
       uiDialogService.hideAll();
       uiModalService.hide();
       toolGroupService.destroy();
+      syncGroupService.destroy();
+      segmentationService.destroy();
+      cornerstoneViewportService.destroy();
     },
     validationTags: {
       study: [],
       series: [],
     },
     isValidMode: ({ modalities }) => {
+      const modalitiesArray = modalities.split('\\');
       return {
-        valid: true,
+        valid:
+        modalitiesArray.length === 1
+          ? !['SM', 'ECG', 'OT', 'DOC'].includes(modalitiesArray[0])
+          : true,
         description: 'UnSAM mode supports all modalities',
       };
     },
@@ -65,15 +157,23 @@ function modeFactory({ modeConfiguration }) {
           return {
             id: ohif.layout,
             props: {
-              leftPanels: [ohif.thumbnailList],
+              leftPanels: [ohif.leftPanel],
               leftPanelResizable: true,
-              rightPanels: [cornerstone.unsam],
-              rightPanelClosed: false,
+              rightPanels: [cornerstone.panelTool],
+              // rightPanelClosed: false,
               rightPanelResizable: true,
               viewports: [
                 {
                   namespace: cornerstone.viewport,
                   displaySetsToDisplay: [ohif.sopClassHandler],
+                },
+                {
+                  namespace: segmentation.viewport,
+                  displaySetsToDisplay: [segmentation.sopClassHandler],
+                },
+                {
+                  namespace: dicomRT.viewport,
+                  displaySetsToDisplay: [dicomRT.sopClassHandler],
                 },
               ],
             },
@@ -82,9 +182,8 @@ function modeFactory({ modeConfiguration }) {
       },
     ],
     extensions: extensionDependencies,
-    hangingProtocol: 'default',
-    sopClassHandlers: [ohif.sopClassHandler],
-    ...modeConfiguration,
+    hangingProtocol:  ['@ohif/mnGrid'],
+    sopClassHandlers: [ohif.sopClassHandler, segmentation.sopClassHandler, dicomRT.sopClassHandler],
   };
 }
 
