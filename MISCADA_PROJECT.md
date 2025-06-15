@@ -37,4 +37,4 @@ yarn run dev:orthanc
 
 
 
-
+![image-20250604055501795](C:\Users\10319\AppData\Roaming\Typora\typora-user-images\image-20250604055501795.png)
