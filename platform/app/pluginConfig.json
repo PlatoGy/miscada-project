@@ -71,6 +71,12 @@
       "packageName": "@ohif/mode-segmentation"
     },
     {
+      "packageName": "@ohif/mode-unsam"
+    },
+    {
+      "packageName": "@ohif/mode-sam"
+    },
+    {
       "packageName": "@ohif/mode-tmtv"
     },
     {
@@ -78,9 +84,6 @@
     },
     {
       "packageName": "@ohif/mode-preclinical-4d"
-    },
-    {
-      "packageName": "@ohif/mode-unsam"
     },
     {
       "packageName": "@ohif/mode-test",
