@@ -38,3 +38,17 @@ yarn run dev:orthanc
 
 
 ![image-20250604055501795](C:\Users\10319\AppData\Roaming\Typora\typora-user-images\image-20250604055501795.png)
+
+
+## 三、项目添加功能方式
+
+### 1.在主页添加功能按钮
+
+### 2.在mode和extension中分别进行修改
+
+### 3.在extensions/cornerstone/src/panels中添加新UI
+
+### 4.在platform/app/package.json 和 platform/app/plugincofig.json中注册mode
+
+## 四、基础查看器使用方式
+https://docs.ohif.org/user-guide/viewer/
