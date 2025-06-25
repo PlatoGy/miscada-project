@@ -34,6 +34,7 @@ import toggleVOISliceSync from './utils/toggleVOISliceSync';
 import { usePositionPresentationStore, useSegmentationPresentationStore } from './stores';
 import { toolNames } from './initCornerstoneTools';
 import CornerstoneViewportDownloadForm from './utils/CornerstoneViewportDownloadForm';
+import CornerstoneSamAndUnsamForm from './utils/CornerstoneSamAndUnsamForm';
 import { updateSegmentBidirectionalStats } from './utils/updateSegmentationStats';
 import { generateSegmentationCSVReport } from './utils/generateSegmentationCSVReport';
 import { getUpdatedViewportsForSegmentation } from './utils/hydrationUtils';
@@ -873,6 +874,62 @@ function commandsModule({
         uiModalService.show({
           content: CornerstoneViewportDownloadForm,
           title: 'Download High Quality Image',
+          contentProps: {
+            activeViewportId,
+            cornerstoneViewportService,
+          },
+          containerClassName: 'max-w-4xl p-4',
+        });
+      }
+    },
+
+    showSAMUploadModal: () => {
+      const { activeViewportId } = viewportGridService.getState();
+
+      if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
+        // Cannot download a non-cornerstone viewport (image).
+        uiNotificationService.show({
+          title: 'Download Image',
+          message: 'Image cannot be downloaded',
+          type: 'error',
+        });
+        return;
+      }
+
+      const { uiModalService } = servicesManager.services;
+
+      if (uiModalService) {
+        uiModalService.show({
+          content: CornerstoneSamAndUnsamForm,
+          title: 'Upload Segmentation Image to SAM',
+          contentProps: {
+            activeViewportId,
+            cornerstoneViewportService,
+          },
+          containerClassName: 'max-w-4xl p-4',
+        });
+      }
+    },
+
+    showUnSAMUploadModal: () => {
+      const { activeViewportId } = viewportGridService.getState();
+
+      if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
+        // Cannot download a non-cornerstone viewport (image).
+        uiNotificationService.show({
+          title: 'Download Image',
+          message: 'Image cannot be downloaded',
+          type: 'error',
+        });
+        return;
+      }
+
+      const { uiModalService } = servicesManager.services;
+
+      if (uiModalService) {
+        uiModalService.show({
+          content: CornerstoneSamAndUnsamForm,
+          title: 'Upload Segmentation Image to UnSAM',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
@@ -2012,6 +2069,12 @@ function commandsModule({
     },
     showDownloadViewportModal: {
       commandFn: actions.showDownloadViewportModal,
+    },
+    showSAMUploadModal: {
+      commandFn: actions.showSAMUploadModal,
+    },
+    showUnSAMUploadModal: {
+      commandFn: actions.showUnSAMUploadModal,
     },
     toggleCine: {
       commandFn: actions.toggleCine,

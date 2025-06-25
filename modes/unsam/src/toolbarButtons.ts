@@ -247,6 +247,23 @@ const toolbarButtons: Button[] = [
     },
   },
   {
+    id: 'UnSAMUpload',
+    uiType: 'ohif.toolButton',
+    props: {
+      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
+      label: 'UnSAM',
+      tooltip: 'Use Segmentation Image to UnSAM',
+      commands: 'showUnSAMUploadModal',
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'wholeSlide'],
+        },
+      ],
+    },
+  },
+  {
     id: 'Layout',
     uiType: 'ohif.layoutSelector',
     props: {

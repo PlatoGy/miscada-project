@@ -57,6 +57,7 @@ function modeFactory({ modeConfiguration }) {
         'Zoom',
         'TrackballRotate',
         'Capture',
+        'SAMUpload',
         'Layout',
         'Crosshairs',
         'MoreTools',
