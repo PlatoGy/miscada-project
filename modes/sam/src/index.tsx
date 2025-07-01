@@ -106,10 +106,19 @@ function modeFactory({ modeConfiguration }) {
         'SegmentationUtilities',
         'SegmentationTools',
       ]);
+      toolbarService.updateSection('SegmentationUtilities', [
+        'SAMApply',
+        // 'LabelmapSlicePropagation',
+        // 'InterpolateLabelmap',
+        // 'SegmentBidirectional',
+      ]);
       toolbarService.updateSection('SegmentationTools', [
+        'BrushTools',
+        'MarkerLabelmap',
         'RegionSegmentPlus',
         'Shapes',
       ]);
+      toolbarService.updateSection('BrushTools', ['Brush', 'Eraser', 'Threshold']);
     },
     onModeExit: ({ servicesManager }) => {
       const { 
