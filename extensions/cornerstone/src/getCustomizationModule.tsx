@@ -10,6 +10,7 @@ import modalityColorMapCustomization from './customizations/modalityColorMapCust
 import windowLevelPresetsCustomization from './customizations/windowLevelPresetsCustomization';
 import miscCustomization from './customizations/miscCustomization';
 import captureViewportModalCustomization from './customizations/captureViewportModalCustomization';
+import samAndUnsamCustomization from './customizations/samAndUnsamCustomization';
 import viewportDownloadWarningCustomization from './customizations/viewportDownloadWarningCustomization';
 
 function getCustomizationModule({ commandsManager, servicesManager }) {
@@ -29,6 +30,7 @@ function getCustomizationModule({ commandsManager, servicesManager }) {
         ...windowLevelPresetsCustomization,
         ...miscCustomization,
         ...captureViewportModalCustomization,
+        ...samAndUnsamCustomization,
         ...viewportDownloadWarningCustomization,
       },
     },

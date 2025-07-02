@@ -254,24 +254,6 @@ const toolbarButtons: Button[] = [
     },
   },
   {
-    id: 'SAMUpload',
-    uiType: 'ohif.toolButton',
-    props: {
-      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
-      label: 'SAM',
-      tooltip: 'Use Segmentation Image to SAM',
-      commands: 'showSAMUploadModal',
-      evaluate: [
-        'evaluate.action',
-        {
-          name: 'evaluate.viewport.supported',
-          unsupportedViewportTypes: ['video', 'wholeSlide'],
-        },
-      ],
-    },
-  },
-  
-  {
     id: 'Layout',
     uiType: 'ohif.layoutSelector',
     props: {

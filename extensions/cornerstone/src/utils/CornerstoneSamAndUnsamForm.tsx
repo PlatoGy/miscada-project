@@ -225,7 +225,7 @@ const CornerstoneViewportDownloadForm = ({
   };
 
   const ViewportSamAndUnsamForm = customizationService.getCustomization(
-    'ohif.captureViewportModal'
+    'ohif.samAndUnsamModal'
   );
 
   return (
@@ -242,6 +242,7 @@ const CornerstoneViewportDownloadForm = ({
       onDisableViewport={handleDisableViewport}
       onDownload={handleDownload}
       warningState={warningState}
+      samImageUrl={''}
     />
   );
 };

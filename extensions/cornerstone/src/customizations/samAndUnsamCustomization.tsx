@@ -17,6 +17,7 @@ interface ViewportDownloadFormNewProps {
   onDisableViewport: () => void;
   onDownload: (filename: string, fileType: string) => void;
   warningState: { enabled: boolean; value: string };
+  samImageUrl?: string; // 新增
 }
 
 function ViewportSamAndUnsamForm({
@@ -32,6 +33,7 @@ function ViewportSamAndUnsamForm({
   onEnableViewport,
   onDisableViewport,
   onDownload,
+  samImageUrl,
 }: ViewportDownloadFormNewProps) {
   const [viewportElement, setViewportElement] = useState<HTMLElement | null>(null);
   const [showWarningMessage, setShowWarningMessage] = useState(true);
@@ -53,95 +55,68 @@ function ViewportSamAndUnsamForm({
   return (
     <ImageModal>
       <ImageModal.Body>
-        <ImageModal.ImageVisual>
-          <div
-            style={{
-              height: dimensions.height,
-              width: dimensions.width,
-              position: 'relative',
-            }}
-            data-viewport-uid={viewportId}
-            ref={setViewportElement}
-          >
-            {warningState.enabled && showWarningMessage && (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
+          {/* 图片区域：左右并排 */}
+          <div style={{ display: 'flex', flexDirection: 'row', gap: 24 }}>
+            {/* 左侧：原始图片 */}
+            <ImageModal.ImageVisual>
               <div
-                className="text-foreground absolute left-1/2 bottom-[5px] z-[1000] -translate-x-1/2 whitespace-nowrap rounded bg-black p-3 text-xs font-bold"
                 style={{
-                  fontSize: '12px',
+                  height: dimensions.height,
+                  width: dimensions.width,
+                  position: 'relative',
+                  overflow: 'hidden',
+                  background: '#222',
                 }}
+                data-viewport-uid={viewportId}
+                ref={setViewportElement}
               >
-                {warningState.value}
+                {/* {warningState.enabled && showWarningMessage && (
+                  <div
+                    className="text-foreground absolute left-1/2 bottom-[5px] z-[1000] -translate-x-1/2 whitespace-nowrap rounded bg-black p-3 text-xs font-bold"
+                    style={{
+                      fontSize: '12px',
+                    }}
+                  >
+                    {warningState.value}
+                  </div>
+                )} */}
               </div>
-            )}
-          </div>
-        </ImageModal.ImageVisual>
+            </ImageModal.ImageVisual>
 
-        <ImageModal.ImageOptions>
-          <div className="flex items-end space-x-2">
-            <ImageModal.Filename
-              value={filename}
-              onChange={e => setFilename(e.target.value)}
-            >
-              File name
-            </ImageModal.Filename>
-            <ImageModal.Filetype
-              selected={fileType}
-              onSelect={setFileType}
-              options={fileTypeOptions}
-            />
-          </div>
-
-          <ImageModal.ImageSize
-            width={dimensions.width.toString()}
-            height={dimensions.height.toString()}
-            onWidthChange={e => {
-              onDimensionsChange({
-                ...dimensions,
-                width: parseInt(e.target.value) || defaultSize,
-              });
-            }}
-            onHeightChange={e => {
-              onDimensionsChange({
-                ...dimensions,
-                height: parseInt(e.target.value) || defaultSize,
-              });
-            }}
-            maxWidth={MAX_TEXTURE_SIZE.toString()}
-            maxHeight={MAX_TEXTURE_SIZE.toString()}
-          >
-            Image size <span className="text-muted-foreground">px</span>
-          </ImageModal.ImageSize>
-
-          <ImageModal.SwitchOption
-            defaultChecked={showAnnotations}
-            checked={showAnnotations}
-            onCheckedChange={onAnnotationsChange}
-          >
-            Include annotations
-          </ImageModal.SwitchOption>
-          {warningState.enabled && (
-            <ImageModal.SwitchOption
-              defaultChecked={showWarningMessage}
-              checked={showWarningMessage}
-              onCheckedChange={setShowWarningMessage}
-            >
-              Include warning message
-            </ImageModal.SwitchOption>
-          )}
-          <FooterAction className="mt-2">
-            <FooterAction.Right>
-              <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
-              <FooterAction.Primary
-                onClick={() => {
-                  onDownload(filename || DEFAULT_FILENAME, fileType);
-                  onClose();
+            {/* 右侧：SAM处理后图片 */}
+            <ImageModal.ImageVisual>
+              <img
+                src={samImageUrl} // 你需要在组件props或state中传入samImageUrl
+                alt="SAM Result"
+                style={{
+                  height: dimensions.height,
+                  width: dimensions.width,
+                  objectFit: 'contain',
+                  background: '#222',
+                  display: 'block',
                 }}
-              >
-                Save
-              </FooterAction.Primary>
-            </FooterAction.Right>
-          </FooterAction>
-        </ImageModal.ImageOptions>
+              />
+            </ImageModal.ImageVisual>
+          </div>
+
+          {/* 按钮区域，居中放在图片下方 */}
+          <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
+            <FooterAction className="mt-2">
+              <FooterAction.Right>
+                <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
+                <FooterAction.Primary
+                  onClick={() => {
+                    onDownload(filename || DEFAULT_FILENAME, fileType);
+                    onClose();
+                  }}
+                >
+                  Save
+                </FooterAction.Primary>
+              </FooterAction.Right>
+            </FooterAction>
+          </div>
+        </div>
       </ImageModal.Body>
     </ImageModal>
   );
