@@ -739,28 +739,22 @@ const toolbarButtons: Button[] = [
   },
 
   {
-    id: 'Shapes',
+    id: 'RectangleScissor',
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'icon-tool-shape',
-      label: 'Shapes',
+      label: 'Rectangle',
       evaluate: {
         name: 'evaluate.cornerstone.segmentation',
         toolNames: ['RectangleScissor'],
         disabledText: 'Create new segmentation to enable shapes tool.',
       },
-      options: [
-        {
-          name: 'Shape',
-          type: 'radio',
-          value: 'RectangleScissor',
-          id: 'shape-mode',
-          values: [
-            { value: 'RectangleScissor', label: 'Rectangle' },
-          ],
-          commands: 'setToolActiveToolbar',
+      commands: {
+        commandName: 'setToolActiveToolbar',
+        commandOptions: {
+          toolNames: ['RectangleScissor'],
         },
-      ],
+      },
     },
   },
 ];

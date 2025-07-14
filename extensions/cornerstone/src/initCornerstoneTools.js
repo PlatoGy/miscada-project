@@ -146,7 +146,7 @@ const toolNames = {
   CalibrationLine: CalibrationLineTool.toolName,
   TrackballRotateTool: TrackballRotateTool.toolName,
   CircleScissors: CircleScissorsTool.toolName,
-  RectangleScissors: RectangleScissorsTool.toolName,
+  RectangleScissor: RectangleScissorsTool.toolName,
   SphereScissors: SphereScissorsTool.toolName,
   ImageOverlayViewer: ImageOverlayViewerTool.toolName,
   AdvancedMagnify: AdvancedMagnifyTool.toolName,

@@ -48,7 +48,6 @@ function modeFactory({ modeConfiguration }) {
 
       // Init Default ToolGroup
       initToolGroups(extensionManager, toolGroupService, commandsManager);
-
       // Init Toolbars
       toolbarService.register(toolbarButtons);
       toolbarService.updateSection(toolbarService.sections.primary, [
@@ -107,15 +106,12 @@ function modeFactory({ modeConfiguration }) {
       ]);
       toolbarService.updateSection('SegmentationUtilities', [
         'SAMApply',
-        // 'LabelmapSlicePropagation',
-        // 'InterpolateLabelmap',
-        // 'SegmentBidirectional',
       ]);
       toolbarService.updateSection('SegmentationTools', [
         'BrushTools',
         'MarkerLabelmap',
         'RegionSegmentPlus',
-        'Shapes',
+        'RectangleScissor',
       ]);
       toolbarService.updateSection('BrushTools', ['Brush', 'Eraser', 'Threshold']);
     },
@@ -147,7 +143,7 @@ function modeFactory({ modeConfiguration }) {
         modalitiesArray.length === 1
           ? !['SM', 'ECG', 'OT', 'DOC'].includes(modalitiesArray[0])
           : true,
-        description: 'UnSAM mode supports all modalities',
+        description: 'SAM mode supports all modalities',
       };
     },
     routes: [
