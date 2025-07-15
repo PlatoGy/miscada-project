@@ -170,13 +170,6 @@ const toolbarButtons: Button[] = [
       buttonSection: true,
     },
   },
-  {
-    id: 'SAMTools',
-    uiType: 'ohif.toolBoxButtonGroup',
-    props: {
-      buttonSection: true,
-    },
-  },
   // Section containers for the nested toolbox
   {
     id: 'SegmentationUtilities',
