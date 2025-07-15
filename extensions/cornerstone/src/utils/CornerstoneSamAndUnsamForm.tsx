@@ -23,11 +23,13 @@ const FILE_TYPE_OPTIONS = [
 type ViewportDownloadFormProps = {
   hide: () => void;
   activeViewportId: string;
+  samImageUrl?: string;
 };
 
 const CornerstoneViewportDownloadForm = ({
   hide,
   activeViewportId: activeViewportIdProp,
+  samImageUrl,
 }: ViewportDownloadFormProps) => {
   const { servicesManager } = useSystem();
   const { customizationService, cornerstoneViewportService } = servicesManager.services;
@@ -242,7 +244,7 @@ const CornerstoneViewportDownloadForm = ({
       onDisableViewport={handleDisableViewport}
       onDownload={handleDownload}
       warningState={warningState}
-      samImageUrl={''}
+      samImageUrl={samImageUrl}
     />
   );
 };

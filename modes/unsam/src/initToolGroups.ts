@@ -100,7 +100,7 @@ function createTools(utilityModule) {
         },
       },
       { toolName: toolNames.CircleScissors },
-      { toolName: toolNames.RectangleScissors },
+      { toolName: toolNames.RectangleScissor },
       { toolName: toolNames.SphereScissors },
       { toolName: toolNames.StackScroll },
       { toolName: toolNames.Magnify },

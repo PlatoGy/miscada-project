@@ -14,7 +14,6 @@ const cornerstone = {
   viewport: '@ohif/extension-cornerstone.viewportModule.cornerstone',
   panelTool: '@ohif/extension-cornerstone.panelModule.panelSegmentationWithTools',
   measurements: '@ohif/extension-cornerstone.panelModule.panelMeasurement',
-  // unsam: '@ohif/extension-cornerstone.panelModule.panelUnSAM',
 };
 
 const segmentation = {
@@ -58,7 +57,6 @@ function modeFactory({ modeConfiguration }) {
         'Zoom',
         'TrackballRotate',
         'Capture',
-        'UnSAMUpload',
         'Layout',
         'Crosshairs',
         'MoreTools',
@@ -106,6 +104,9 @@ function modeFactory({ modeConfiguration }) {
       toolbarService.updateSection(toolbarService.sections.segmentationToolbox, [
         'SegmentationUtilities',
         'SegmentationTools',
+      ]);
+      toolbarService.updateSection('SegmentationUtilities', [
+        'UnSAMApply',
       ]);
       toolbarService.updateSection('SegmentationUtilities', [
         // 'LabelmapSlicePropagation',

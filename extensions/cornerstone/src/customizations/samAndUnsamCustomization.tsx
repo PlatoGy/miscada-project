@@ -92,7 +92,7 @@ function ViewportSamAndUnsamForm({
                 style={{
                   height: dimensions.height,
                   width: dimensions.width,
-                  objectFit: 'contain',
+                  objectFit: 'cover',
                   background: '#222',
                   display: 'block',
                 }}

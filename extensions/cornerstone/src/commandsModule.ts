@@ -896,120 +896,164 @@ function commandsModule({
         });
         return;
       }
-      // 获取当前 viewport 的 enabledElement
-      const enabledElement = cornerstone.getEnabledElement(element);
+      const { uiModalService } = servicesManager.services;
 
-      // 获取所有 RectangleROI 注释
-      const rectangleROIs = annotation.state.getAnnotations('RectangleROI');
+      // 1. 显示 loading 弹窗
+      let loadingModalId = null;
+      if (uiModalService) {
+        loadingModalId = uiModalService.show({
+          title: '',
+          content: () =>
+            React.createElement(
+              'div',
+              { style: { padding: 32, textAlign: 'center', color: '#fff' } },
+              'Processing image, please wait...'
+            ),
+          containerClassName: 'min-w-[300px] p-4',
+        });
+      }
 
-      // 遍历获取坐标
-      rectangleROIs.forEach(roi => {
-        // roi.data.handles.points 是四个角的坐标（世界坐标或像素坐标，取决于工具配置）
-        const points = roi.data.handles.points;
-        // points: [{x, y}, {x, y}, {x, y}, {x, y}]
-        // 你可以根据需要转换为左上角+宽高等格式
-        console.log('ROI points:', points);
-      });
+      // 2. 获取 viewport DOM 元素
+      const divForUpload = document.querySelector(
+        `div[data-viewport-uid="${activeViewportId}"]`
+      );
+      if (!divForUpload) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'No viewport found for upload',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
 
-      // const { uiModalService } = servicesManager.services;
+      // 2. 截图为图片
+      const fileType = 'png';
+      const canvas = await html2canvas(divForUpload as HTMLElement);
+      const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
 
-      // // 1. 显示 loading 弹窗
-      // let loadingModalId = null;
-      // if (uiModalService) {
-      //   loadingModalId = uiModalService.show({
-      //     title: '',
-      //     content: () =>
-      //       React.createElement(
-      //         'div',
-      //         { style: { padding: 32, textAlign: 'center', color: '#fff' } },
-      //         'Processing image, please wait...'
-      //       ),
-      //     containerClassName: 'min-w-[300px] p-4',
-      //   });
-      // }
+      // 构造FormData
+      const formData = new FormData();
+      formData.append('file', blob, `image.${fileType}`);
+      formData.append('box', '[206,206,306,306]');
+      formData.append('return_mask', 'false');
 
-      // // 2. 获取 viewport DOM 元素
-      // const divForUpload = document.querySelector(
-      //   `div[data-viewport-uid="${activeViewportId}"]`
-      // );
-      // if (!divForUpload) {
-      //   uiNotificationService.show({
-      //     title: 'Upload Image',
-      //     message: 'No viewport found for upload',
-      //     type: 'error',
-      //   });
-      //   if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
-      //   return;
-      // }
+      // 3. 上传到后端
+      let samImageUrl = '';
+      try {
+        const resp = await fetch('http://localhost:8000/segment', {
+          method: 'POST',
+          body: formData,
+        });
+        if (resp.headers.get('content-type')?.includes('image')) {
+          const resultBlob = await resp.blob();
+          samImageUrl = URL.createObjectURL(resultBlob);
+        } else {
+          const data = await resp.json();
+          samImageUrl = data.samImageUrl;
+        }
+      } catch (e) {
+        uiNotificationService.show({
+          title: 'SAM Error',
+          message: 'SAM处理失败',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
 
-      // // 2. 截图为图片
-      // const fileType = 'png';
-      // const canvas = await html2canvas(divForUpload as HTMLElement);
-      // const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
+      // 关闭loading
+      if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
 
-      // // 构造FormData
-      // const formData = new FormData();
-      // formData.append('file', blob, `image.${fileType}`);
-      // formData.append('box', '[206,206,306,306]');
-      // formData.append('return_mask', 'false');
-
-      // // 3. 上传到后端
-      // let samImageUrl = '';
-      // try {
-      //   const resp = await fetch('http://localhost:8000/segment', {
-      //     method: 'POST',
-      //     body: formData,
-      //   });
-      //   if (resp.headers.get('content-type')?.includes('image')) {
-      //     const resultBlob = await resp.blob();
-      //     samImageUrl = URL.createObjectURL(resultBlob);
-      //   } else {
-      //     const data = await resp.json();
-      //     samImageUrl = data.samImageUrl;
-      //   }
-      // } catch (e) {
-      //   uiNotificationService.show({
-      //     title: 'SAM Error',
-      //     message: 'SAM处理失败',
-      //     type: 'error',
-      //   });
-      //   if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
-      //   return;
-      // }
-
-      // // 关闭loading
-      // if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
-
-      // // 4. 展示弹窗，并把 samImageUrl 传给 contentProps
-      // if (uiModalService) {
-      //   uiModalService.show({
-      //     content: CornerstoneSamAndUnsamForm,
-      //     title: 'Upload Segmentation Image to SAM',
-      //     contentProps: {
-      //       activeViewportId,
-      //       cornerstoneViewportService,
-      //       samImageUrl, // 传递给弹窗组件
-      //     },
-      //     containerClassName: 'min-w-[1150px] p-4',
-      //   });
-      // }
+      // 4. 展示弹窗，并把 samImageUrl 传给 contentProps
+      if (uiModalService) {
+        uiModalService.show({
+          content: CornerstoneSamAndUnsamForm,
+          title: 'Upload Segmentation Image to SAM',
+          contentProps: {
+            activeViewportId,
+            cornerstoneViewportService,
+            samImageUrl, // 传递给弹窗组件
+          },
+          containerClassName: 'min-w-[1150px] p-4',
+        });
+      }
     },
 
-    showUnSAMUploadModal: () => {
+    showUnSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
       if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
-        // Cannot download a non-cornerstone viewport (image).
         uiNotificationService.show({
-          title: 'Download Image',
-          message: 'Image cannot be downloaded',
+          title: 'Upload Image',
+          message: 'Image cannot be uploaded',
           type: 'error',
         });
         return;
       }
-
       const { uiModalService } = servicesManager.services;
 
+      // 1. 显示 loading 弹窗
+      let loadingModalId = null;
+      if (uiModalService) {
+        loadingModalId = uiModalService.show({
+          title: '',
+          content: () =>
+            React.createElement(
+              'div',
+              { style: { padding: 32, textAlign: 'center', color: '#fff' } },
+              'Processing image, please wait...'
+            ),
+          containerClassName: 'min-w-[300px] p-4',
+        });
+      }
+
+      // 2. 获取 viewport DOM 元素
+      const divForUpload = document.querySelector(
+        `div[data-viewport-uid="${activeViewportId}"]`
+      );
+      if (!divForUpload) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'No viewport found for upload',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      // 2. 截图为图片
+      const fileType = 'png';
+      const canvas = await html2canvas(divForUpload as HTMLElement);
+      const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
+
+      // 构造FormData
+      const formData = new FormData();
+      formData.append('file', blob, `image.${fileType}`);
+      const IMAGE_URL_PREFIX = 'http://localhost:8000'; // 根据你的后端实际地址设置
+      // 3. 上传到后端（接口返回 image_url）
+      let samImageUrl = '';
+      try {
+        const resp = await fetch('http://localhost:8000/unsam', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await resp.json();
+        samImageUrl = IMAGE_URL_PREFIX + data.image_url;
+      } catch (e) {
+        uiNotificationService.show({
+          title: 'UnSAM Error',
+          message: 'UnSAM处理失败',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      // 关闭loading
+      if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+
+      // 4. 展示弹窗，并把 unsamImageUrl 传给 contentProps
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
@@ -1017,8 +1061,9 @@ function commandsModule({
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
+            samImageUrl, // 传递给弹窗组件
           },
-          containerClassName: 'max-w-4xl p-4',
+          containerClassName: 'min-w-[1150px] p-4',
         });
       }
     },
