@@ -396,6 +396,23 @@ const toolbarButtons: Button[] = [
     },
   },
   {
+    id: 'StoreOriginSlice',
+    uiType: 'ohif.toolBoxButton',
+    props: {
+      icon: 'icon-tool-click-segment', // 暂时使用cine图标，后续加icon
+      label: 'Store Origin Slice',
+      tooltip: 'Store Origin Slice',
+      commands: 'storeOriginSlice',
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'wholeSlide'],
+        },
+      ],
+    },
+  },
+  {
     id: 'SAMApply',
     uiType: 'ohif.toolBoxButton',
     props: {
@@ -412,7 +429,6 @@ const toolbarButtons: Button[] = [
       ],
     },
   },
-
   {
     id: 'Brush',
     uiType: 'ohif.toolBoxButton',

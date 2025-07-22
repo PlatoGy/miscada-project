@@ -50,6 +50,9 @@ const toggleSyncFunctions = {
 
 const { segmentation: segmentationUtils } = cstUtils;
 
+// 在文件顶部添加全局变量
+let originSliceBlob: Blob | null = null;
+
 const getLabelmapTools = ({ toolGroupService }) => {
   const labelmapTools = [];
   const toolGroupIds = toolGroupService.getToolGroupIds();
@@ -884,11 +887,30 @@ function commandsModule({
         });
       }
     },
+    storeOriginSlice: async () => {
+      // 获取当前 viewport DOM 元素
+      const { activeViewportId } = viewportGridService.getState();
+      const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
+      if (!divForUpload) {
+        originSliceBlob = null;
+        return;
+      }
+      // 截图并保存 Blob
+      const canvas = await html2canvas(divForUpload as HTMLElement);
+      originSliceBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+      // 成功后弹窗提示
+      uiNotificationService.show({
+        title: '截图成功',
+        message: '原始图像截图已保存，可用于后续上传。',
+        type: 'success',
+      });
+    },
 
     showSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
+      const csViewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
 
-      if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
+      if (!csViewport) {
         uiNotificationService.show({
           title: 'Upload Image',
           message: 'Image cannot be uploaded',
@@ -896,9 +918,10 @@ function commandsModule({
         });
         return;
       }
+
       const { uiModalService } = servicesManager.services;
 
-      // 1. 显示 loading 弹窗
+      // 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -913,10 +936,8 @@ function commandsModule({
         });
       }
 
-      // 2. 获取 viewport DOM 元素
-      const divForUpload = document.querySelector(
-        `div[data-viewport-uid="${activeViewportId}"]`
-      );
+      // 获取 viewport DOM 元素
+      const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
           title: 'Upload Image',
@@ -927,53 +948,117 @@ function commandsModule({
         return;
       }
 
-      // 2. 截图为图片
+      // // ✅ 获取 pixelData 并转换为 PNG Blob（适配 OHIF Stack/Volume）
+      // let pixelPNGBlob = null;
+
+      // try {
+      //   let width, height, pixelData;
+
+      //   if ('getImage' in csViewport && typeof csViewport.getImage === 'function') {
+      //     // Stack 模式
+      //     const image = csViewport.getImage();
+      //     pixelData = image.getPixelData();
+      //     width = image.width;
+      //     height = image.height;
+      //   } else {
+      //     // Volume 模式（OHIF 封装）
+      //     const imageData = csViewport.getImageData();
+      //     const scalars = imageData?.scalarData;
+      //     const dimensions = imageData?.dimensions;
+
+      //     if (!scalars || !dimensions) throw new Error('无法读取图像体数据');
+
+      //     width = dimensions[0];
+      //     height = dimensions[1];
+      //     const sliceIndex = csViewport.getCurrentImageIdIndex?.() ?? 0;
+      //     const pixelsPerSlice = width * height;
+      //     const start = sliceIndex * pixelsPerSlice;
+      //     const end = start + pixelsPerSlice;
+      //     pixelData = scalars.slice(start, end);
+      //   }
+
+      //   // 🧠 安全计算 min/max（避免扩展符堆栈溢出）
+      //   let min = Infinity;
+      //   let max = -Infinity;
+      //   for (let i = 0; i < pixelData.length; i++) {
+      //     const val = pixelData[i];
+      //     if (val < min) min = val;
+      //     if (val > max) max = val;
+      //   }
+
+      //   // 🎨 渲染灰度图到 Canvas
+      //   const canvas = document.createElement('canvas');
+      //   canvas.width = width;
+      //   canvas.height = height;
+      //   const ctx = canvas.getContext('2d');
+      //   const imageDataObj = ctx.createImageData(width, height);
+      //   const data = imageDataObj.data;
+
+      //   for (let i = 0; i < pixelData.length; i++) {
+      //     const val = pixelData[i];
+      //     const gray = max > min ? ((val - min) / (max - min)) * 255 : 0;
+      //     const g = Math.round(gray);
+      //     data[i * 4] = g;
+      //     data[i * 4 + 1] = g;
+      //     data[i * 4 + 2] = g;
+      //     data[i * 4 + 3] = 255;
+      //   }
+
+      //   ctx.putImageData(imageDataObj, 0, 0);
+      //   pixelPNGBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
+      // } catch (e) {
+      //   console.error('PixelData 转 PNG 失败:', e);
+      // }
+
+      // 📸 使用 html2canvas 截取可视图
       const fileType = 'png';
-      const canvas = await html2canvas(divForUpload as HTMLElement);
-      const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
+      const screenshotCanvas = await html2canvas(divForUpload as HTMLElement);
+      const screenshotBlob: Blob = await new Promise(resolve =>
+        screenshotCanvas.toBlob(resolve, `image/${fileType}`, 1.0)
+      );
 
-      // 构造FormData
+      // 📦 构造上传内容
       const formData = new FormData();
-      formData.append('file', blob, `image.${fileType}`);
-      formData.append('box', '[206,206,306,306]');
-      formData.append('return_mask', 'false');
+      formData.append('rect_image', screenshotBlob, `image.${fileType}`);
+      // if (pixelPNGBlob) {
+      //   formData.append('pixel_image', pixelPNGBlob, 'pixel_data.png');
+      // }
+      // 添加原始截图
+      if (originSliceBlob) {
+        formData.append('file', originSliceBlob, 'origin_slice.png');
+      }
 
-      // 3. 上传到后端
+      const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
         const resp = await fetch('http://localhost:8000/segment', {
           method: 'POST',
           body: formData,
         });
-        if (resp.headers.get('content-type')?.includes('image')) {
-          const resultBlob = await resp.blob();
-          samImageUrl = URL.createObjectURL(resultBlob);
-        } else {
-          const data = await resp.json();
-          samImageUrl = data.samImageUrl;
-        }
+        const data = await resp.json();
+        samImageUrl = IMAGE_URL_PREFIX + data.image_url;
       } catch (e) {
         uiNotificationService.show({
-          title: 'SAM Error',
-          message: 'SAM处理失败',
+          title: 'UnSAM Error',
+          message: 'UnSAM处理失败',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
         return;
       }
 
-      // 关闭loading
+      // ✅ 关闭 loading 弹窗
       if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
 
-      // 4. 展示弹窗，并把 samImageUrl 传给 contentProps
+      // ✅ 打开最终确认弹窗
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to SAM',
+          title: 'Upload Segmentation Image to UnSAM',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
-            samImageUrl, // 传递给弹窗组件
+            samImageUrl,
           },
           containerClassName: 'min-w-[1150px] p-4',
         });
@@ -1030,11 +1115,11 @@ function commandsModule({
       // 构造FormData
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
-      const IMAGE_URL_PREFIX = 'http://localhost:8000'; // 根据你的后端实际地址设置
+      const IMAGE_URL_PREFIX = 'http://localhost:8008'; // 根据你的后端实际地址设置
       // 3. 上传到后端（接口返回 image_url）
       let samImageUrl = '';
       try {
-        const resp = await fetch('http://localhost:8000/unsam', {
+        const resp = await fetch('http://localhost:8008/unsam', {
           method: 'POST',
           body: formData,
         });
@@ -2198,6 +2283,9 @@ function commandsModule({
     },
     showDownloadViewportModal: {
       commandFn: actions.showDownloadViewportModal,
+    },
+    storeOriginSlice: {
+      commandFn: actions.storeOriginSlice,
     },
     showSAMUploadModal: {
       commandFn: actions.showSAMUploadModal,

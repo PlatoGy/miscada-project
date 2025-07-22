@@ -105,6 +105,7 @@ function modeFactory({ modeConfiguration }) {
         'SegmentationTools',
       ]);
       toolbarService.updateSection('SegmentationUtilities', [
+        'StoreOriginSlice',
         'SAMApply',
       ]);
       toolbarService.updateSection('SegmentationTools', [
