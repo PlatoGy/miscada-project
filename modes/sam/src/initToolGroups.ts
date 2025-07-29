@@ -30,8 +30,11 @@ function createTools(utilityModule) {
       {
         toolName: toolNames.LabelmapSlicePropagation,
       },
+      // {
+      //   toolName: toolNames.MarkerLabelmap,
+      // },
       {
-        toolName: toolNames.MarkerLabelmap,
+        toolName: toolNames.SimpleMarker,
       },
       {
         toolName: toolNames.RegionSegmentPlus,

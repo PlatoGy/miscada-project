@@ -817,7 +817,7 @@ function commandsModule({
     setToolActiveToolbar: ({ value, itemId, toolName, toolGroupIds = [] }) => {
       // Sometimes it is passed as value (tools with options), sometimes as itemId (toolbar buttons)
       toolName = toolName || itemId || value;
-
+      console.debug('setToolActiveToolbar', toolName);
       toolGroupIds = toolGroupIds.length ? toolGroupIds : toolGroupService.getToolGroupIds();
 
       toolGroupIds.forEach(toolGroupId => {
@@ -900,12 +900,11 @@ function commandsModule({
       originSliceBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
       // 成功后弹窗提示
       uiNotificationService.show({
-        title: '截图成功',
-        message: '原始图像截图已保存，可用于后续上传。',
+        title: 'The screenshot was successful.',
+        message: 'The screenshot of the original image has been saved and can be used for subsequent uploads.',
         type: 'success',
       });
     },
-
     showSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
       const csViewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
@@ -921,7 +920,50 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
-      // 显示 loading 弹窗
+      // 1️⃣ 弹出选择框，确认使用哪个提示类型
+      const promptType = await new Promise<'points' | 'rectangle' | 'mask' | null>(resolve => {
+        if (!uiModalService) return resolve(null);
+
+        const PromptSelector = () => {
+          return React.createElement(
+            'div',
+            { style: { padding: 24, textAlign: 'center', color: '#fff' } }, // 白色字体
+            React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select SAM prompt type'),
+            React.createElement(
+              'div',
+              { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
+              ...['points', 'rectangle', 'mask'].map(type =>
+                React.createElement(
+                  'button',
+                  {
+                    key: type,
+                    onClick: () => {
+                      resolve(type as any);
+                      uiModalService.hide(modalId);
+                    },
+                    className: 'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
+                  },
+                  type.toUpperCase()
+                )
+              )
+            )
+          );
+        };
+
+
+        const modalId = uiModalService.show({
+          title: 'Select Prompt Type',
+          content: PromptSelector,
+          containerClassName: 'min-w-[300px] p-4',
+          isDraggable: true,
+        });
+      });
+
+      if (!promptType) {
+        return;
+      }
+
+      // 2️⃣ 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -936,7 +978,7 @@ function commandsModule({
         });
       }
 
-      // 获取 viewport DOM 元素
+      // 3️⃣ 获取 viewport DOM 元素
       const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
@@ -948,109 +990,50 @@ function commandsModule({
         return;
       }
 
-      // // ✅ 获取 pixelData 并转换为 PNG Blob（适配 OHIF Stack/Volume）
-      // let pixelPNGBlob = null;
-
-      // try {
-      //   let width, height, pixelData;
-
-      //   if ('getImage' in csViewport && typeof csViewport.getImage === 'function') {
-      //     // Stack 模式
-      //     const image = csViewport.getImage();
-      //     pixelData = image.getPixelData();
-      //     width = image.width;
-      //     height = image.height;
-      //   } else {
-      //     // Volume 模式（OHIF 封装）
-      //     const imageData = csViewport.getImageData();
-      //     const scalars = imageData?.scalarData;
-      //     const dimensions = imageData?.dimensions;
-
-      //     if (!scalars || !dimensions) throw new Error('无法读取图像体数据');
-
-      //     width = dimensions[0];
-      //     height = dimensions[1];
-      //     const sliceIndex = csViewport.getCurrentImageIdIndex?.() ?? 0;
-      //     const pixelsPerSlice = width * height;
-      //     const start = sliceIndex * pixelsPerSlice;
-      //     const end = start + pixelsPerSlice;
-      //     pixelData = scalars.slice(start, end);
-      //   }
-
-      //   // 🧠 安全计算 min/max（避免扩展符堆栈溢出）
-      //   let min = Infinity;
-      //   let max = -Infinity;
-      //   for (let i = 0; i < pixelData.length; i++) {
-      //     const val = pixelData[i];
-      //     if (val < min) min = val;
-      //     if (val > max) max = val;
-      //   }
-
-      //   // 🎨 渲染灰度图到 Canvas
-      //   const canvas = document.createElement('canvas');
-      //   canvas.width = width;
-      //   canvas.height = height;
-      //   const ctx = canvas.getContext('2d');
-      //   const imageDataObj = ctx.createImageData(width, height);
-      //   const data = imageDataObj.data;
-
-      //   for (let i = 0; i < pixelData.length; i++) {
-      //     const val = pixelData[i];
-      //     const gray = max > min ? ((val - min) / (max - min)) * 255 : 0;
-      //     const g = Math.round(gray);
-      //     data[i * 4] = g;
-      //     data[i * 4 + 1] = g;
-      //     data[i * 4 + 2] = g;
-      //     data[i * 4 + 3] = 255;
-      //   }
-
-      //   ctx.putImageData(imageDataObj, 0, 0);
-      //   pixelPNGBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
-      // } catch (e) {
-      //   console.error('PixelData 转 PNG 失败:', e);
-      // }
-
-      // 📸 使用 html2canvas 截取可视图
       const fileType = 'png';
       const screenshotCanvas = await html2canvas(divForUpload as HTMLElement);
       const screenshotBlob: Blob = await new Promise(resolve =>
         screenshotCanvas.toBlob(resolve, `image/${fileType}`, 1.0)
       );
 
-      // 📦 构造上传内容
       const formData = new FormData();
-      formData.append('rect_image', screenshotBlob, `image.${fileType}`);
-      // if (pixelPNGBlob) {
-      //   formData.append('pixel_image', pixelPNGBlob, 'pixel_data.png');
-      // }
-      // 添加原始截图
+      formData.append('sam_image', screenshotBlob, `image.${fileType}`);
       if (originSliceBlob) {
         formData.append('file', originSliceBlob, 'origin_slice.png');
       }
 
+      // 4️⃣ 请求后端接口
       const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
-        const resp = await fetch('http://localhost:8000/segment', {
+        const routeMap = {
+          points: '/points',
+          rectangle: '/segment',
+          mask: '/mask', // 需后端实现
+        };
+
+        const route = routeMap[promptType];
+        const resp = await fetch(`http://localhost:8000${route}`, {
           method: 'POST',
           body: formData,
         });
+
         const data = await resp.json();
         samImageUrl = IMAGE_URL_PREFIX + data.image_url;
       } catch (e) {
+        console.error(e);
         uiNotificationService.show({
-          title: 'UnSAM Error',
-          message: 'UnSAM处理失败',
+          title: 'SAM Error',
+          message: 'SAM处理失败',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
         return;
       }
 
-      // ✅ 关闭 loading 弹窗
       if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
 
-      // ✅ 打开最终确认弹窗
+      // 5️⃣ 打开结果弹窗
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
@@ -1064,7 +1047,6 @@ function commandsModule({
         });
       }
     },
-
     showUnSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
@@ -2002,18 +1984,42 @@ function commandsModule({
     clearMarkersForMarkerLabelmap: () => {
       const { viewport } = _getActiveViewportEnabledElement();
       const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroupForViewport(viewport.id);
-      const toolInstance = toolGroup.getToolInstance('MarkerLabelmap');
-
+      const toolInstance = toolGroup.getToolInstance('SimpleMarker');
+      
+      if (toolGroup) {
+        const tools = toolGroup._toolInstances; // 注意：_toolInstances 是内部字段
+        console.log('[🔍 当前 toolGroup 中的工具]:', Object.keys(tools));
+      } else {
+        console.warn('❌ 未找到默认 ToolGroup');
+      }
       if (!toolInstance) {
         return;
       }
 
       toolInstance.clearMarkers(viewport);
     },
+    clearSimpleMarkersForMarkerLabelmap: () => {
+      const { viewport } = _getActiveViewportEnabledElement();
+      const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroupForViewport(viewport.id);
+      const toolInstance = toolGroup.getToolInstance('SimpleMarker');
+      
+      if (toolGroup) {
+        const tools = toolGroup._toolInstances; // 注意：_toolInstances 是内部字段
+        console.log('[🔍 当前 toolGroup 中的工具]:', Object.keys(tools));
+      } else {
+        console.warn('❌ 未找到默认 ToolGroup');
+      }
+      if (!toolInstance) {
+        return;
+      }
+
+      toolInstance.clearMarkers(viewport);
+    },
+
     interpolateScrollForMarkerLabelmap: () => {
       const { viewport } = _getActiveViewportEnabledElement();
       const toolGroup = cornerstoneTools.ToolGroupManager.getToolGroupForViewport(viewport.id);
-      const toolInstance = toolGroup.getToolInstance('MarkerLabelmap');
+      const toolInstance = toolGroup.getToolInstance('SimpleMarker');
 
       if (!toolInstance) {
         return;
@@ -2436,6 +2442,7 @@ function commandsModule({
     toggleLabelmapAssist: actions.toggleLabelmapAssist,
     interpolateScrollForMarkerLabelmap: actions.interpolateScrollForMarkerLabelmap,
     clearMarkersForMarkerLabelmap: actions.clearMarkersForMarkerLabelmap,
+    clearSimpleMarkersForMarkerLabelmap: actions.clearSimpleMarkersForMarkerLabelmap,
     setBrushSize: actions.setBrushSize,
     setThresholdRange: actions.setThresholdRange,
     increaseBrushSize: actions.increaseBrushSize,

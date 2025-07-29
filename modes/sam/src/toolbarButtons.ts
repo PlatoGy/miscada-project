@@ -399,7 +399,7 @@ const toolbarButtons: Button[] = [
     id: 'StoreOriginSlice',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'icon-tool-click-segment', // 暂时使用cine图标，后续加icon
+      icon: 'link', // 暂时使用link图标，后续加icon
       label: 'Store Origin Slice',
       tooltip: 'Store Origin Slice',
       commands: 'storeOriginSlice',
@@ -501,22 +501,22 @@ const toolbarButtons: Button[] = [
       commands: 'runSegmentBidirectional',
     },
   },
-  {
-    id: 'RegionSegmentPlus',
-    uiType: 'ohif.toolBoxButton',
-    props: {
-      icon: 'icon-tool-click-segment',
-      label: 'One Click Segment',
-      tooltip:
-        'Detects segmentable regions with one click. Hover for visual feedback—click when a plus sign appears to auto-segment the lesion.',
-      evaluate: {
-        name: 'evaluate.cornerstone.segmentation',
-        toolNames: ['RegionSegmentPlus'],
-        disabledText: 'Create new segmentation to enable this tool.',
-      },
-      commands: 'setToolActiveToolbar',
-    },
-  },
+  // {
+  //   id: 'RegionSegmentPlus',
+  //   uiType: 'ohif.toolBoxButton',
+  //   props: {
+  //     icon: 'icon-tool-click-segment',
+  //     label: 'One Click Segment',
+  //     tooltip:
+  //       'Detects segmentable regions with one click. Hover for visual feedback—click when a plus sign appears to auto-segment the lesion.',
+  //     evaluate: {
+  //       name: 'evaluate.cornerstone.segmentation',
+  //       toolNames: ['RegionSegmentPlus'],
+  //       disabledText: 'Create new segmentation to enable this tool.',
+  //     },
+  //     commands: 'setToolActiveToolbar',
+  //   },
+  // },
   {
     id: 'LabelmapSlicePropagation',
     uiType: 'ohif.toolBoxButton',
@@ -540,53 +540,100 @@ const toolbarButtons: Button[] = [
       commands: 'toggleEnabledDisabledToolbar',
     },
   },
+  // {
+  //   id: 'MarkerLabelmap',
+  //   uiType: 'ohif.toolBoxButton',
+  //   props: {
+  //     icon: 'icon-marker-labelmap',
+  //     label: 'Marker Guided Labelmap',
+  //     tooltip:
+  //       'Use include/exclude markers to guide AI (SAM) segmentation. Click to place markers, Enter to accept results, Esc to reject, and N to go to the next slice while keeping markers.',
+  //     evaluate: [
+  //       {
+  //         name: 'evaluate.cornerstone.segmentation',
+  //         toolNames: ['MarkerLabelmap', 'MarkerInclude', 'MarkerExclude'],
+  //       },
+  //     ],
+  //     commands: 'setToolActiveToolbar',
+  //     listeners: {
+  //       [ViewportGridService.EVENTS.ACTIVE_VIEWPORT_ID_CHANGED]: callbacks('MarkerLabelmap'),
+  //       [ViewportGridService.EVENTS.VIEWPORTS_READY]: callbacks('MarkerLabelmap'),
+  //     },
+  //     options: [
+  //       {
+  //         name: 'Marker Mode',
+  //         type: 'radio',
+  //         id: 'marker-mode',
+  //         value: 'markerInclude',
+  //         values: [
+  //           { value: 'markerInclude', label: 'Include' },
+  //           { value: 'markerExclude', label: 'Exclude' },
+  //         ],
+  //         commands: ({ commandsManager, options }) => {
+  //           const markerModeOption = options.find(option => option.id === 'marker-mode');
+  //           if (markerModeOption.value === 'markerInclude') {
+  //             commandsManager.run('setToolActive', {
+  //               toolName: 'MarkerInclude',
+  //             });
+  //           } else {
+  //             commandsManager.run('setToolActive', {
+  //               toolName: 'MarkerExclude',
+  //             });
+  //           }
+  //         },
+  //       },
+  //       {
+  //         name: 'Clear Markers',
+  //         type: 'button',
+  //         id: 'clear-markers',
+  //         commands: 'clearMarkersForMarkerLabelmap',
+  //       },
+  //     ],
+  //   },
+  // },
   {
-    id: 'MarkerLabelmap',
+    id: 'SimpleMarker',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'icon-marker-labelmap',
-      label: 'Marker Guided Labelmap',
-      tooltip:
-        'Use include/exclude markers to guide AI (SAM) segmentation. Click to place markers, Enter to accept results, Esc to reject, and N to go to the next slice while keeping markers.',
+      icon: 'icon-marker-labelmap', // 可换成你自定义的 icon
+      label: 'Simple Marker',
+      tooltip: 'Place include/exclude markers for visual reference.',
       evaluate: [
         {
           name: 'evaluate.cornerstone.segmentation',
-          toolNames: ['MarkerLabelmap', 'MarkerInclude', 'MarkerExclude'],
+          toolNames: ['SimpleMarker', 'SimpleMarkerInclude', 'SimpleMarkerExclude'],
+          disabledText: 'Create a segmentation to enable this tool.',
         },
       ],
       commands: 'setToolActiveToolbar',
       listeners: {
-        [ViewportGridService.EVENTS.ACTIVE_VIEWPORT_ID_CHANGED]: callbacks('MarkerLabelmap'),
-        [ViewportGridService.EVENTS.VIEWPORTS_READY]: callbacks('MarkerLabelmap'),
+        [ViewportGridService.EVENTS.ACTIVE_VIEWPORT_ID_CHANGED]: callbacks('SimpleMarker'),
+        [ViewportGridService.EVENTS.VIEWPORTS_READY]: callbacks('SimpleMarker'),
       },
       options: [
         {
           name: 'Marker Mode',
           type: 'radio',
-          id: 'marker-mode',
-          value: 'markerInclude',
+          id: 'simple-marker-mode',
+          value: 'include', // 默认值
           values: [
-            { value: 'markerInclude', label: 'Include' },
-            { value: 'markerExclude', label: 'Exclude' },
+            { value: 'include', label: 'Include' },
+            { value: 'exclude', label: 'Exclude' },
           ],
           commands: ({ commandsManager, options }) => {
-            const markerModeOption = options.find(option => option.id === 'marker-mode');
-            if (markerModeOption.value === 'markerInclude') {
-              commandsManager.run('setToolActive', {
-                toolName: 'MarkerInclude',
-              });
-            } else {
-              commandsManager.run('setToolActive', {
-                toolName: 'MarkerExclude',
-              });
-            }
+            const markerModeOption = options.find(opt => opt.id === 'simple-marker-mode');
+            const selected = markerModeOption?.value;
+
+            commandsManager.run('setToolActive', {
+              toolName: selected === 'include' ? 'SimpleMarkerInclude' : 'SimpleMarkerExclude',
+            });
           },
         },
         {
           name: 'Clear Markers',
           type: 'button',
           id: 'clear-markers',
-          commands: 'clearMarkersForMarkerLabelmap',
+          commands: 'clearSimpleMarkersForMarkerLabelmap',
         },
       ],
     },

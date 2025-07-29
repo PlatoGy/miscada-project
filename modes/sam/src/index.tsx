@@ -110,8 +110,9 @@ function modeFactory({ modeConfiguration }) {
       ]);
       toolbarService.updateSection('SegmentationTools', [
         'BrushTools',
-        'MarkerLabelmap',
-        'RegionSegmentPlus',
+        // 'MarkerLabelmap',
+        'SimpleMarker',
+        // 'RegionSegmentPlus',
         'RectangleScissor',
       ]);
       toolbarService.updateSection('BrushTools', ['Brush', 'Eraser', 'Threshold']);

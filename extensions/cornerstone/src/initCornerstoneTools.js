@@ -45,11 +45,12 @@ import * as polySeg from '@cornerstonejs/polymorphic-segmentation';
 
 import CalibrationLineTool from './tools/CalibrationLineTool';
 import ImageOverlayViewerTool from './tools/ImageOverlayViewerTool';
-
+import SimpleMarkerTool from './tools/SimpleMarkerTool';
 export default function initCornerstoneTools(configuration = {}) {
   CrosshairsTool.isAnnotation = false;
   LabelmapSlicePropagationTool.isAnnotation = false;
   MarkerLabelmapTool.isAnnotation = false;
+  SimpleMarkerTool.isAnnotation = false;
   ReferenceLinesTool.isAnnotation = false;
   AdvancedMagnifyTool.isAnnotation = false;
   PlanarFreehandContourSegmentationTool.isAnnotation = false;
@@ -104,6 +105,7 @@ export default function initCornerstoneTools(configuration = {}) {
   addTool(SegmentSelectTool);
   addTool(LabelmapSlicePropagationTool);
   addTool(MarkerLabelmapTool);
+  addTool(SimpleMarkerTool);
   addTool(RegionSegmentPlusTool);
   // Modify annotation tools to use dashed lines on SR
   const annotationStyle = {
@@ -161,6 +163,8 @@ const toolNames = {
   SegmentSelect: SegmentSelectTool.toolName,
   LabelmapSlicePropagation: LabelmapSlicePropagationTool.toolName,
   MarkerLabelmap: MarkerLabelmapTool.toolName,
+  // MarkerLabelmap: SimpleMarkerTool.toolName, 
+  SimpleMarker: SimpleMarkerTool.toolName,
   RegionSegmentPlus: RegionSegmentPlusTool.toolName,
 };
 
