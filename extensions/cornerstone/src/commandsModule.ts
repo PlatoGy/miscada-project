@@ -909,6 +909,15 @@ function commandsModule({
       const { activeViewportId } = viewportGridService.getState();
       const csViewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
 
+      if (!originSliceBlob) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'Please store the origin slice first',
+          type: 'error',
+        });
+        return;
+      }
+      
       if (!csViewport) {
         uiNotificationService.show({
           title: 'Upload Image',
