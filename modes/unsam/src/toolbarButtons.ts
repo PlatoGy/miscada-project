@@ -409,7 +409,7 @@ const toolbarButtons: Button[] = [
           name: 'evaluate.viewport.supported',
           unsupportedViewportTypes: ['video', 'wholeSlide'],
         },
-        { name: 'evaluate.cornerstone.hasSegmentation' },
+        { name: 'evaluate.cornerstone.segmentation'},
       ],
     },
   },
