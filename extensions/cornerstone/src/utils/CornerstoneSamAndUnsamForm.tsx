@@ -210,6 +210,21 @@ const CornerstoneViewportDownloadForm = ({
   }, [viewportDimensions, showAnnotations]);
 
   const handleDownload = async (filename: string, fileType: string) => {
+    if (samImageUrl) {
+      try {
+        const response = await fetch(samImageUrl);
+        const blob = await response.blob();
+        const link = document.createElement('a');
+        link.download = `${filename}.${fileType}`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+        return;
+      } catch (error) {
+        console.error('Error downloading SAM image:', error);
+      }
+    }
+    
     const divForDownloadViewport = document.querySelector(
       `div[data-viewport-uid="${VIEWPORT_ID}"]`
     );
