@@ -1056,6 +1056,89 @@ function commandsModule({
         });
       }
     },
+    autoSegmentLiver: async () => {
+      const { activeViewportId } = viewportGridService.getState();
+
+      if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'Image cannot be uploaded',
+          type: 'error',
+        });
+        return;
+      }
+
+      const { uiModalService } = servicesManager.services;
+
+      let loadingModalId = null;
+      if (uiModalService) {
+        loadingModalId = uiModalService.show({
+          title: '',
+          content: () =>
+            React.createElement(
+              'div',
+              { style: { padding: 32, textAlign: 'center', color: '#fff' } },
+              'Processing image, please wait...'
+            ),
+          containerClassName: 'min-w-[300px] p-4',
+        });
+      }
+
+      const divForUpload = document.querySelector(
+        `div[data-viewport-uid="${activeViewportId}"]`
+      );
+      if (!divForUpload) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'No viewport found for upload',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      const fileType = 'png';
+      const canvas = await html2canvas(divForUpload as HTMLElement);
+      const blob: Blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, `image/${fileType}`, 1.0)
+      );
+
+      const formData = new FormData();
+      formData.append('file', blob, `image.${fileType}`);
+      const IMAGE_URL_PREFIX = 'http://localhost:8000';
+      let samImageUrl = '';
+      try {
+        const resp = await fetch('http://localhost:8000/auto', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await resp.json();
+        samImageUrl = IMAGE_URL_PREFIX + data.image_url;
+      } catch (e) {
+        uiNotificationService.show({
+          title: 'Auto Segment Error',
+          message: 'Auto segment failed',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+
+      if (uiModalService) {
+        uiModalService.show({
+          content: CornerstoneSamAndUnsamForm,
+          title: 'Upload Segmentation Image to UnSAM',
+          contentProps: {
+            activeViewportId,
+            cornerstoneViewportService,
+            samImageUrl,
+          },
+          containerClassName: 'min-w-[1150px] p-4',
+        });
+      }
+    },
     showUnSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
@@ -2307,6 +2390,9 @@ function commandsModule({
     },
     showUnSAMUploadModal: {
       commandFn: actions.showUnSAMUploadModal,
+    },
+    autoSegmentLiver: {
+      commandFn: actions.autoSegmentLiver,
     },
     toggleCine: {
       commandFn: actions.toggleCine,

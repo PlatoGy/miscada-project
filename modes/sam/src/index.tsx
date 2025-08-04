@@ -107,6 +107,7 @@ function modeFactory({ modeConfiguration }) {
       toolbarService.updateSection('SegmentationUtilities', [
         'StoreOriginSlice',
         'SAMApply',
+        'AutoSegmentLiver',
       ]);
       toolbarService.updateSection('SegmentationTools', [
         'BrushTools',

@@ -432,6 +432,24 @@ const toolbarButtons: Button[] = [
     },
   },
   {
+    id: 'AutoSegmentLiver',
+    uiType: 'ohif.toolBoxButton',
+    props: {
+      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
+      label: 'Auto Segment Liver',
+      tooltip: 'Auto Segment Liver',
+      commands: 'autoSegmentLiver',
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'wholeSlide'],
+        },
+        { name: 'evaluate.cornerstone.segmentation'},
+      ],
+    },
+  },
+  {
     id: 'Brush',
     uiType: 'ohif.toolBoxButton',
     props: {
