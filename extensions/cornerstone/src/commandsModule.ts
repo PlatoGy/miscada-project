@@ -1070,6 +1070,52 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
+      // 1️⃣ 弹出器官选择框
+      const organ = await new Promise<'liver' | null>(resolve => {
+        if (!uiModalService) return resolve(null);
+
+        const OrganSelector = () => {
+          return React.createElement(
+            'div',
+            { style: { padding: 24, textAlign: 'center', color: '#fff' } },
+            React.createElement(
+              'h3',
+              { style: { marginBottom: 16, fontSize: 18 } },
+              'Select Organ'
+            ),
+            React.createElement(
+              'div',
+              { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
+              React.createElement(
+                'button',
+                {
+                  key: 'liver',
+                  onClick: () => {
+                    resolve('liver');
+                    uiModalService.hide(modalId);
+                  },
+                  className:
+                    'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
+                },
+                'LIVER'
+              )
+            )
+          );
+        };
+
+        const modalId = uiModalService.show({
+          title: 'Select Organ',
+          content: OrganSelector,
+          containerClassName: 'min-w-[300px] p-4',
+          isDraggable: true,
+        });
+      });
+
+      if (!organ) {
+        return;
+      }
+
+      // 2️⃣ 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -1084,6 +1130,7 @@ function commandsModule({
         });
       }
 
+      // 3️⃣ 获取 viewport DOM 元素
       const divForUpload = document.querySelector(
         `div[data-viewport-uid="${activeViewportId}"]`
       );
@@ -1105,10 +1152,16 @@ function commandsModule({
 
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
+      formData.append('organ', organ);
       const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
-        const resp = await fetch('http://localhost:8000/auto', {
+        const routeMap = {
+          liver: '/auto_liver',
+        };
+
+        const route = routeMap[organ];
+        const resp = await fetch(`http://localhost:8000${route}`, {
           method: 'POST',
           body: formData,
         });
