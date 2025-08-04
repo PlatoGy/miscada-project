@@ -18,6 +18,9 @@ export default function PanelSegmentation({ children }: withAppTypes) {
   const onSegmentationAdd = customizationService.getCustomization(
     'panelSegmentation.onSegmentationAdd'
   );
+  const customOnSegmentAdd = customizationService.getCustomization(
+    'panelSegmentation.onSegmentAdd'
+  );
   const disableEditing = customizationService.getCustomization('panelSegmentation.disableEditing');
   const showAddSegment = customizationService.getCustomization('panelSegmentation.showAddSegment');
   const CustomDropdownMenuContent = customizationService.getCustomization(
@@ -34,6 +37,10 @@ export default function PanelSegmentation({ children }: withAppTypes) {
       commandsManager.run('setActiveSegmentation', { segmentationId });
     },
     onSegmentAdd: segmentationId => {
+      if (customOnSegmentAdd) {
+        customOnSegmentAdd(segmentationId);
+        return;
+      }
       commandsManager.run('addSegment', { segmentationId });
     },
     onSegmentClick: (segmentationId, segmentIndex) => {

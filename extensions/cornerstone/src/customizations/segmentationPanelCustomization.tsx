@@ -14,6 +14,15 @@ export default function getSegmentationPanelCustomization({ commandsManager, ser
       const viewportId = viewportGridService.getState().activeViewportId;
       commandsManager.run('createLabelmapForViewport', { viewportId });
     },
+    'panelSegmentation.onSegmentAdd': segmentationId => {
+      const { segmentationService } = servicesManager.services;
+      const segmentation = segmentationService.getSegmentation(segmentationId);
+      const segments = segmentation?.segments || {};
+      if (Object.keys(segments).length > 0) {
+        return;
+      }
+      commandsManager.run('addSegment', { segmentationId });
+    },
     'panelSegmentation.tableMode': 'collapsed',
     'panelSegmentation.readableText': {
       // the values will appear in this order

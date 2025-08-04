@@ -43,8 +43,9 @@ export const AddSegmentRow: React.FC<{ children?: React.ReactNode }> = ({ childr
     <Icons.Show className="h-6 w-6" />
   );
 
-  const allowAddSegment = showAddSegment && !disableEditing;
-
+  // const allowAddSegment = showAddSegment && !disableEditing;
+  const segmentCount = Object.keys(representation?.segments || {}).length;
+  const allowAddSegment = showAddSegment && !disableEditing && segmentCount === 0;
   return (
     <div className="my-px flex h-7 w-full items-center justify-between rounded pl-0.5 pr-7">
       <div className="mt-1 flex-1">
