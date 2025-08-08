@@ -109,6 +109,9 @@ function modeFactory({ modeConfiguration }) {
         'UnSAMApply',
       ]);
       toolbarService.updateSection('SegmentationUtilities', [
+        'PointUnSAMApply',
+      ]);
+      toolbarService.updateSection('SegmentationUtilities', [
         // 'LabelmapSlicePropagation',
         // 'InterpolateLabelmap',
         // 'SegmentBidirectional',

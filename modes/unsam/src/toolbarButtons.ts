@@ -414,6 +414,24 @@ const toolbarButtons: Button[] = [
     },
   },
   {
+    id: 'PointUnSAMApply',
+    uiType: 'ohif.toolBoxButton',
+    props: {
+      icon: 'tool-cine',
+      label: 'Point UnSAM',
+      tooltip: 'Apply point UnSAM segmentation',
+      commands: 'showPointUnSAMUploadModal',
+      evaluate: [
+        'evaluate.action',
+        {
+          name: 'evaluate.viewport.supported',
+          unsupportedViewportTypes: ['video', 'wholeSlide'],
+        },
+        { name: 'evaluate.cornerstone.segmentation' },
+      ],
+    },
+  },
+  {
     id: 'Brush',
     uiType: 'ohif.toolBoxButton',
     props: {

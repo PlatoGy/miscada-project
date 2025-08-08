@@ -23,7 +23,7 @@ const FILE_TYPE_OPTIONS = [
 type ViewportDownloadFormProps = {
   hide: () => void;
   activeViewportId: string;
-  samImageUrl?: string;
+  samImageUrl?: string | string[];
 };
 
 const CornerstoneViewportDownloadForm = ({
@@ -208,11 +208,18 @@ const CornerstoneViewportDownloadForm = ({
       }, 100);
     }
   }, [viewportDimensions, showAnnotations]);
-
-  const handleDownload = async (filename: string, fileType: string) => {
-    if (samImageUrl) {
+  
+  const handleDownload = async (
+    filename: string,
+    fileType: string,
+    index = 0
+  ) => {
+    const url = Array.isArray(samImageUrl)
+      ? samImageUrl[index] || samImageUrl[0]
+      : samImageUrl;
+    if (url) {
       try {
-        const response = await fetch(samImageUrl);
+        const response = await fetch(url);
         const blob = await response.blob();
         const link = document.createElement('a');
         link.download = `${filename}.${fileType}`;

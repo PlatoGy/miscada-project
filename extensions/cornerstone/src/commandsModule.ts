@@ -1279,6 +1279,135 @@ function commandsModule({
         });
       }
     },
+    showPointUnSAMUploadModal: async () => {
+      const { activeViewportId } = viewportGridService.getState();
+
+      if (!cornerstoneViewportService.getCornerstoneViewport(activeViewportId)) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'Image cannot be uploaded',
+          type: 'error',
+        });
+        return;
+      }
+
+      const { uiModalService } = servicesManager.services;
+
+      const organ = await new Promise<'liver' | null>(resolve => {
+        if (!uiModalService) return resolve(null);
+
+        const OrganSelector = () =>
+          React.createElement(
+            'div',
+            { style: { padding: 24, textAlign: 'center', color: '#fff' } },
+            React.createElement(
+              'h3',
+              { style: { marginBottom: 16, fontSize: 18 } },
+              'Select Organ'
+            ),
+            React.createElement(
+              'div',
+              { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
+              React.createElement(
+                'button',
+                {
+                  key: 'liver',
+                  onClick: () => {
+                    resolve('liver');
+                    uiModalService.hide(modalId);
+                  },
+                  className:
+                    'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
+                },
+                'LIVER'
+              )
+            )
+          );
+
+        const modalId = uiModalService.show({
+          title: 'Select Organ',
+          content: OrganSelector,
+          containerClassName: 'min-w-[300px] p-4',
+          isDraggable: true,
+        });
+      });
+
+      if (!organ) {
+        return;
+      }
+
+      // show loading modal
+      let loadingModalId = null;
+      if (uiModalService) {
+        loadingModalId = uiModalService.show({
+          title: '',
+          content: () =>
+            React.createElement(
+              'div',
+              { style: { padding: 32, textAlign: 'center', color: '#fff' } },
+              'Processing image, please wait...'
+            ),
+          containerClassName: 'min-w-[300px] p-4',
+        });
+      }
+
+      const divForUpload = document.querySelector(
+        `div[data-viewport-uid="${activeViewportId}"]`
+      );
+      if (!divForUpload) {
+        uiNotificationService.show({
+          title: 'Upload Image',
+          message: 'No viewport found for upload',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      const fileType = 'png';
+      const canvas = await html2canvas(divForUpload as HTMLElement);
+      const blob: Blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, `image/${fileType}`, 1.0)
+      );
+
+      const formData = new FormData();
+      formData.append('file', blob, `image.${fileType}`);
+      formData.append('organ', organ);
+      const IMAGE_URL_PREFIX = 'http://localhost:8008';
+      let segmentationUrls: string[] = [];
+      try {
+        const resp = await fetch('http://localhost:8008/point_unsam', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await resp.json();
+        const results = data.segmentation_results || [];
+        segmentationUrls = results.map((url: string) => IMAGE_URL_PREFIX + url);
+      } catch (e) {
+        uiNotificationService.show({
+          title: 'UnSAM Error',
+          message: 'UnSAM处理失败',
+          type: 'error',
+        });
+        if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+        return;
+      }
+
+      if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
+
+      if (uiModalService) {
+        uiModalService.show({
+          content: CornerstoneSamAndUnsamForm,
+          title: 'Upload Segmentation Image to UnSAM',
+          contentProps: {
+            activeViewportId,
+            cornerstoneViewportService,
+            samImageUrl: segmentationUrls,
+          },
+          containerClassName: 'min-w-[1150px] p-4',
+        });
+      }
+    },
     rotateViewport: ({ rotation }) => {
       const enabledElement = _getActiveViewportEnabledElement();
       if (!enabledElement) {
@@ -2446,6 +2575,9 @@ function commandsModule({
     },
     autoSegmentLiver: {
       commandFn: actions.autoSegmentLiver,
+    },
+    showPointUnSAMUploadModal: {
+      commandFn: actions.showPointUnSAMUploadModal,
     },
     toggleCine: {
       commandFn: actions.toggleCine,

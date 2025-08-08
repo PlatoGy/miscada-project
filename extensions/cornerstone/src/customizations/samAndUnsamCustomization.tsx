@@ -15,9 +15,9 @@ interface ViewportDownloadFormNewProps {
   onDimensionsChange: (dimensions: { width: number; height: number }) => void;
   onEnableViewport: (element: HTMLElement) => void;
   onDisableViewport: () => void;
-  onDownload: (filename: string, fileType: string) => void;
+  onDownload: (filename: string, fileType: string, index?: number) => void;
   warningState: { enabled: boolean; value: string };
-  samImageUrl?: string; // 新增
+  samImageUrl?: string | string[]; // 支持多个结果
 }
 
 function ViewportSamAndUnsamForm({
@@ -39,7 +39,12 @@ function ViewportSamAndUnsamForm({
   const [showWarningMessage, setShowWarningMessage] = useState(true);
   const [filename, setFilename] = useState(DEFAULT_FILENAME);
   const [fileType, setFileType] = useState('jpg');
-
+  const urls = Array.isArray(samImageUrl)
+    ? samImageUrl
+    : samImageUrl
+    ? [samImageUrl]
+    : [];
+  const [currentIndex, setCurrentIndex] = useState(0);
   useEffect(() => {
     if (!viewportElement) {
       return;
@@ -86,35 +91,87 @@ function ViewportSamAndUnsamForm({
 
             {/* 右侧：SAM处理后图片 */}
             <ImageModal.ImageVisual>
-              <img
-                src={samImageUrl} // 你需要在组件props或state中传入samImageUrl
-                alt="SAM Result"
+              <div
                 style={{
                   height: dimensions.height,
                   width: dimensions.width,
-                  objectFit: 'cover',
+                  position: 'relative',
                   background: '#222',
-                  display: 'block',
                 }}
-              />
+              >
+                {urls.length > 0 && (
+                  <>
+                    <img
+                      src={urls[currentIndex]}
+                      alt="SAM Result"
+                      style={{
+                        height: '100%',
+                        width: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                    {urls.length > 1 && (
+                      <>
+                        <button
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: 0,
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(0,0,0,0.5)',
+                            color: '#fff',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                          }}
+                          onClick={() =>
+                            setCurrentIndex((currentIndex - 1 + urls.length) % urls.length)
+                          }
+                        >
+                          {'<'}
+                        </button>
+                        <button
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            right: 0,
+                            transform: 'translateY(-50%)',
+                            background: 'rgba(0,0,0,0.5)',
+                            color: '#fff',
+                            border: 'none',
+                            cursor: 'pointer',
+                            padding: '4px 8px',
+                          }}
+                          onClick={() =>
+                            setCurrentIndex((currentIndex + 1) % urls.length)
+                          }
+                        >
+                          {'>'}
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
             </ImageModal.ImageVisual>
           </div>
 
           {/* 按钮区域，居中放在图片下方 */}
           <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
             <FooterAction className="mt-2">
-              <FooterAction.Right>
-                <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
-                <FooterAction.Primary
-                  onClick={() => {
-                    onDownload(filename || DEFAULT_FILENAME, fileType);
-                    onClose();
-                  }}
-                >
-                  Save
-                </FooterAction.Primary>
-              </FooterAction.Right>
-            </FooterAction>
+            <FooterAction.Right>
+              <FooterAction.Secondary onClick={onClose}>Cancel</FooterAction.Secondary>
+              <FooterAction.Primary
+                onClick={() => {
+                  onDownload(filename || DEFAULT_FILENAME, fileType, currentIndex);
+                  onClose();
+                }}
+              >
+                Save
+              </FooterAction.Primary>
+            </FooterAction.Right>
+          </FooterAction>
           </div>
         </div>
       </ImageModal.Body>
