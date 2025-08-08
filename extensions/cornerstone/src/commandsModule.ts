@@ -910,7 +910,7 @@ function commandsModule({
       if (!originSliceBlob) {
         uiNotificationService.show({
           title: 'Upload Image',
-          message: 'Please store the origin slice first',
+          message: 'Please store the original slice first',
           type: 'error',
         });
         return;

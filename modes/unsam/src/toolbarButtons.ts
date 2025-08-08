@@ -400,8 +400,8 @@ const toolbarButtons: Button[] = [
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'unsam',
-      label: 'UnSAM',
-      tooltip: 'Apply image to UnSAM',
+      label: 'UnSAM-Whole Image',
+      tooltip: 'Use whole-image segmentation of UnSAM Model',
       commands: 'showUnSAMUploadModal',
       evaluate: [
         'evaluate.action',
@@ -418,8 +418,8 @@ const toolbarButtons: Button[] = [
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'point-unsam',
-      label: 'Point UnSAM',
-      tooltip: 'Apply point UnSAM segmentation',
+      label: 'UnSAM-Prompt Segmentation',
+      tooltip: 'Use promptable segmentation of UnSAM Model',
       commands: 'showPointUnSAMUploadModal',
       evaluate: [
         'evaluate.action',

@@ -400,8 +400,8 @@ const toolbarButtons: Button[] = [
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'store-origin-slice',
-      label: 'Store Origin Slice',
-      tooltip: 'Store Origin Slice',
+      label: 'Store Original Slice',
+      tooltip: 'Save the original slice for uploading to the SAM Model',
       commands: 'storeOriginSlice',
       evaluate: [
         'evaluate.action',
@@ -418,8 +418,8 @@ const toolbarButtons: Button[] = [
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'sam',
-      label: 'SAM',
-      tooltip: 'Use Segmentation Image to SAM',
+      label: 'Apply SAM Model',
+      tooltip: 'Use Segmentation Image to SAM Model',
       commands: 'showSAMUploadModal',
       evaluate: [
         'evaluate.action',
@@ -436,8 +436,8 @@ const toolbarButtons: Button[] = [
     uiType: 'ohif.toolBoxButton',
     props: {
       icon: 'auto-segment-liver',
-      label: 'Auto Segment Liver',
-      tooltip: 'Auto Segment Liver',
+      label: 'Auto Segment Organ',
+      tooltip: 'Select organs for SAM Model to segment automatically',
       commands: 'autoSegmentLiver',
       evaluate: [
         'evaluate.action',
