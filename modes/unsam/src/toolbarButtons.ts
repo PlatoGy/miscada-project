@@ -399,7 +399,7 @@ const toolbarButtons: Button[] = [
     id: 'UnSAMApply',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
+      icon: 'unsam',
       label: 'UnSAM',
       tooltip: 'Apply image to UnSAM',
       commands: 'showUnSAMUploadModal',
@@ -417,7 +417,7 @@ const toolbarButtons: Button[] = [
     id: 'PointUnSAMApply',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'tool-cine',
+      icon: 'point-unsam',
       label: 'Point UnSAM',
       tooltip: 'Apply point UnSAM segmentation',
       commands: 'showPointUnSAMUploadModal',

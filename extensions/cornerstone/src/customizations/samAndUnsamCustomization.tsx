@@ -89,7 +89,6 @@ function ViewportSamAndUnsamForm({
               </div>
             </ImageModal.ImageVisual>
 
-            {/* 右侧：SAM处理后图片 */}
             <ImageModal.ImageVisual>
               <div
                 style={{
@@ -157,7 +156,6 @@ function ViewportSamAndUnsamForm({
             </ImageModal.ImageVisual>
           </div>
 
-          {/* 按钮区域，居中放在图片下方 */}
           <div style={{ width: '100%', display: 'flex', justifyContent: 'center', marginTop: 16 }}>
             <FooterAction className="mt-2">
             <FooterAction.Right>

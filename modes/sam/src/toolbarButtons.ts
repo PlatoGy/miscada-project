@@ -399,7 +399,7 @@ const toolbarButtons: Button[] = [
     id: 'StoreOriginSlice',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'link', // 暂时使用link图标，后续加icon
+      icon: 'store-origin-slice',
       label: 'Store Origin Slice',
       tooltip: 'Store Origin Slice',
       commands: 'storeOriginSlice',
@@ -417,7 +417,7 @@ const toolbarButtons: Button[] = [
     id: 'SAMApply',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
+      icon: 'sam',
       label: 'SAM',
       tooltip: 'Use Segmentation Image to SAM',
       commands: 'showSAMUploadModal',
@@ -435,7 +435,7 @@ const toolbarButtons: Button[] = [
     id: 'AutoSegmentLiver',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'tool-cine', // 暂时使用cine图标，后续加icon
+      icon: 'auto-segment-liver',
       label: 'Auto Segment Liver',
       tooltip: 'Auto Segment Liver',
       commands: 'autoSegmentLiver',
@@ -615,7 +615,7 @@ const toolbarButtons: Button[] = [
     id: 'SimpleMarker',
     uiType: 'ohif.toolBoxButton',
     props: {
-      icon: 'icon-marker-labelmap', // 可换成你自定义的 icon
+      icon: 'icon-marker-labelmap',
       label: 'Simple Marker',
       tooltip: 'Place include/exclude markers for visual reference.',
       evaluate: [
@@ -635,7 +635,7 @@ const toolbarButtons: Button[] = [
           name: 'Marker Mode',
           type: 'radio',
           id: 'simple-marker-mode',
-          value: 'include', // 默认值
+          value: 'include',
           values: [
             { value: 'include', label: 'Include' },
             { value: 'exclude', label: 'Exclude' },

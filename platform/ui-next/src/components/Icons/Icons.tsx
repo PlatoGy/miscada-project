@@ -82,6 +82,11 @@ import LayerSegmentation from './Sources/LayerSegmentation';
 import WindowLevelAdvanced from './Sources/WindowLevelAdvanced';
 import Opacity from './Sources/Opacity';
 import Threshold from './Sources/Threshold';
+import StoreOriginSlice from './Sources/StoreOriginSlice';
+import Sam from './Sources/Sam';
+import AutoSegmentLiver from './Sources/AutoSegmentLiver';
+import UnSam from './Sources/UnSam';
+import PointUnSam from './Sources/PointUnSam';
 import {
   Tool3DRotate,
   ToolAngle,
@@ -627,6 +632,11 @@ export const Icons = {
   'icon-link': (props: IconProps) => Link(props),
   'icon-clear': (props: IconProps) => Clear(props),
   'icon-search': (props: IconProps) => Search(props),
+  'store-origin-slice': (props: IconProps) => StoreOriginSlice(props),
+  sam: (props: IconProps) => Sam(props),
+  'auto-segment-liver': (props: IconProps) => AutoSegmentLiver(props),
+  unsam: (props: IconProps) => UnSam(props),
+  'point-unsam': (props: IconProps) => PointUnSam(props),
   'viewport-window-level': (props: IconProps) => ViewportWindowLevel(props),
   'action-new-dialog': (props: IconProps) => ActionNewDialog(props),
   'arrow-left': (props: IconProps) => Icons.ArrowLeft(props),
