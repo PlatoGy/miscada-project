@@ -31,7 +31,7 @@ export const AddSegmentationRow: React.FC<{ children?: React.ReactNode }> = ({
         <div className="grid h-[28px] w-[28px] place-items-center">
           {disabled ? <Icons.Info /> : <Icons.Add />}
         </div>
-        <span className="text-[13px]">
+        <span className="text-[13px]" data-cy="add-segmentation">
           {t(`${disabled ? 'Segmentation Not Supported' : 'Add Segmentation'}`)}
         </span>
       </div>

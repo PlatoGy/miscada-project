@@ -206,5 +206,134 @@ export default {
         },
       },
     },
+    {
+      id: 'unsamTour',
+      route: '/unsam',
+      steps: [
+        {
+          id: 'addSegment',
+          title: '1. Add Segmentation',
+          text: 'First, add a segmentation.',
+          attachTo: {
+            element: '[data-cy="add-segmentation"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="add-segmentation"]'),
+        },
+        {
+          id: 'unsamWholeImage',
+          title: '2. UnSAM Whole Image Segmentation',
+          text: 'Apply slice to UnSAM whole-image segmentation.',
+          attachTo: {
+            element: '[data-cy="UnSAMApply"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="UnSAMApply"]'),
+        },
+        {
+          id: 'unsamPrompt',
+          title: '3. UnSAM Promptable Segmentation',
+          text: 'Apply slice to UnSAM promptable segmentation.',
+          attachTo: {
+            element: '[data-cy="PointUnSAMApply"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="PointUnSAMApply"]'),
+        },
+      ],
+      tourOptions: {
+        useModalOverlay: true,
+        defaultStepOptions: {
+          advanceOn: {
+            selector: 'body',
+            event: 'click',
+          },
+          buttons: [
+            {
+              text: 'Skip all',
+              action() {
+                this.complete();
+              },
+              secondary: true,
+            },
+          ],
+        },
+      },
+    },
+    {
+      id: 'samTour',
+      route: '/sam',
+      steps: [
+        {
+          id: 'samAddSegment',
+          title: '1. Add Segmentation',
+          text: 'First, add a segmentation.',
+          attachTo: {
+            element: '[data-cy="add-segmentation"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="add-segmentation"]'),
+        },
+        {
+          id: 'autoSegment',
+          title: '2. Auto Segmentation',
+          text: 'You can choose an organ to apply the SAM model and automatically segment it.',
+          attachTo: {
+            element: '[data-cy="AutoSegmentLiver"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="AutoSegmentLiver"]'),
+        },
+        {
+          id: 'storeOriginalSlice',
+          title: '3. Store Original Slice',
+          text: 'If you want to Use SAM model on the slice with any annotations, you need to store the original slice first.',
+          attachTo: {
+            element: '[data-cy="StoreOriginSlice"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="StoreOriginSlice"]'),
+        },
+        {
+          id: 'annotate',
+          title: '4. Annotate',
+          text: 'These are the annotation tools. Use them to add annotations.',
+          attachTo: {
+            element: '[data-cy="RectangleScissor"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="RectangleScissor"]'),
+        },
+        {
+          id: 'applySam',
+          title: '5. SAM Segmentation',
+          text: 'Apply the SAM model to the annotations you have made.',
+          attachTo: {
+            element: '[data-cy="SAMApply"]',
+            on: 'left',
+          },
+          beforeShowPromise: () => waitForElement('[data-cy="SAMApply"]'),
+        },
+      ],
+      tourOptions: {
+        useModalOverlay: true,
+        defaultStepOptions: {
+          advanceOn: {
+            selector: 'body',
+            event: 'click',
+          },
+          buttons: [
+            {
+              text: 'Skip all',
+              action() {
+                this.complete();
+              },
+              secondary: true,
+            },
+          ],
+        },
+      },
+    }
+
   ],
 };
