@@ -17,7 +17,7 @@ interface ViewportDownloadFormNewProps {
   onDisableViewport: () => void;
   onDownload: (filename: string, fileType: string, index?: number) => void;
   warningState: { enabled: boolean; value: string };
-  samImageUrl?: string | string[]; // 支持多个结果
+  samImageUrl?: string | string[]; 
 }
 
 function ViewportSamAndUnsamForm({

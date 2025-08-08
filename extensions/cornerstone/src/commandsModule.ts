@@ -888,17 +888,15 @@ function commandsModule({
       }
     },
     storeOriginSlice: async () => {
-      // 获取当前 viewport DOM 元素
       const { activeViewportId } = viewportGridService.getState();
       const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         originSliceBlob = null;
         return;
       }
-      // 截图并保存 Blob
       const canvas = await html2canvas(divForUpload as HTMLElement);
       originSliceBlob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png', 1.0));
-      // 成功后弹窗提示
+
       uiNotificationService.show({
         title: 'The screenshot was successful.',
         message: 'The screenshot of the original image has been saved and can be used for subsequent uploads.',
@@ -929,14 +927,13 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
-      // 1️⃣ 弹出选择框，确认使用哪个提示类型
       const promptType = await new Promise<'points' | 'rectangle' | 'mask' | null>(resolve => {
         if (!uiModalService) return resolve(null);
 
         const PromptSelector = () => {
           return React.createElement(
             'div',
-            { style: { padding: 24, textAlign: 'center', color: '#fff' } }, // 白色字体
+            { style: { padding: 24, textAlign: 'center', color: '#fff' } }, 
             React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select SAM prompt type'),
             React.createElement(
               'div',
@@ -972,7 +969,6 @@ function commandsModule({
         return;
       }
 
-      // 2️⃣ 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -987,7 +983,6 @@ function commandsModule({
         });
       }
 
-      // 3️⃣ 获取 viewport DOM 元素
       const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
@@ -1011,14 +1006,13 @@ function commandsModule({
         formData.append('file', originSliceBlob, 'origin_slice.png');
       }
 
-      // 4️⃣ 请求后端接口
       const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
         const routeMap = {
           points: '/points',
           rectangle: '/segment',
-          mask: '/mask', // 需后端实现
+          mask: '/mask', 
         };
 
         const route = routeMap[promptType];
@@ -1042,7 +1036,6 @@ function commandsModule({
 
       if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
 
-      // 5️⃣ 打开结果弹窗
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
@@ -1070,7 +1063,6 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
-      // 1️⃣ 弹出器官选择框
       const organ = await new Promise<'liver' | null>(resolve => {
         if (!uiModalService) return resolve(null);
 
@@ -1115,7 +1107,6 @@ function commandsModule({
         return;
       }
 
-      // 2️⃣ 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -1130,7 +1121,6 @@ function commandsModule({
         });
       }
 
-      // 3️⃣ 获取 viewport DOM 元素
       const divForUpload = document.querySelector(
         `div[data-viewport-uid="${activeViewportId}"]`
       );
@@ -1205,7 +1195,6 @@ function commandsModule({
       }
       const { uiModalService } = servicesManager.services;
 
-      // 1. 显示 loading 弹窗
       let loadingModalId = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
@@ -1220,7 +1209,6 @@ function commandsModule({
         });
       }
 
-      // 2. 获取 viewport DOM 元素
       const divForUpload = document.querySelector(
         `div[data-viewport-uid="${activeViewportId}"]`
       );
@@ -1234,16 +1222,14 @@ function commandsModule({
         return;
       }
 
-      // 2. 截图为图片
       const fileType = 'png';
       const canvas = await html2canvas(divForUpload as HTMLElement);
       const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
 
-      // 构造FormData
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
-      const IMAGE_URL_PREFIX = 'http://localhost:8008'; // 根据你的后端实际地址设置
-      // 3. 上传到后端（接口返回 image_url）
+      const IMAGE_URL_PREFIX = 'http://localhost:8008'; 
+
       let samImageUrl = '';
       try {
         const resp = await fetch('http://localhost:8008/unsam', {
@@ -1262,10 +1248,8 @@ function commandsModule({
         return;
       }
 
-      // 关闭loading
       if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
 
-      // 4. 展示弹窗，并把 unsamImageUrl 传给 contentProps
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
@@ -1273,7 +1257,7 @@ function commandsModule({
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
-            samImageUrl, // 传递给弹窗组件
+            samImageUrl, 
           },
           containerClassName: 'min-w-[1150px] p-4',
         });
