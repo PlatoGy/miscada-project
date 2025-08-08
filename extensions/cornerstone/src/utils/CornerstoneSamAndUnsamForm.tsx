@@ -228,7 +228,7 @@ const CornerstoneViewportDownloadForm = ({
         URL.revokeObjectURL(link.href);
         return;
       } catch (error) {
-        console.error('Error downloading SAM image:', error);
+        console.error('Error downloading image:', error);
       }
     }
     

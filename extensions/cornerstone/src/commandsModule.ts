@@ -1027,7 +1027,7 @@ function commandsModule({
         console.error(e);
         uiNotificationService.show({
           title: 'SAM Error',
-          message: 'SAM处理失败',
+          message: 'SAM upload failed',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
@@ -1039,7 +1039,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to UnSAM',
+          title: 'Upload Segmentation Image to SAM Model',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
@@ -1172,7 +1172,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to UnSAM',
+          title: 'Upload Segmentation Image to SAM Model',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
@@ -1241,7 +1241,7 @@ function commandsModule({
       } catch (e) {
         uiNotificationService.show({
           title: 'UnSAM Error',
-          message: 'UnSAM处理失败',
+          message: 'UnSAM Error',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
@@ -1253,7 +1253,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to UnSAM',
+          title: 'Upload Segmentation Image to UnSAM Model(Whole Image Segmentation)',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
@@ -1370,7 +1370,7 @@ function commandsModule({
       } catch (e) {
         uiNotificationService.show({
           title: 'UnSAM Error',
-          message: 'UnSAM处理失败',
+          message: 'UnSAM Error',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
@@ -1382,7 +1382,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to UnSAM',
+          title: 'Upload Segmentation Image to UnSAM Model(Promptable Segmentation)',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,

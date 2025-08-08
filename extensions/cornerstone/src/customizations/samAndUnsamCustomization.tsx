@@ -61,9 +61,7 @@ function ViewportSamAndUnsamForm({
     <ImageModal>
       <ImageModal.Body>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 24 }}>
-          {/* 图片区域：左右并排 */}
           <div style={{ display: 'flex', flexDirection: 'row', gap: 24 }}>
-            {/* 左侧：原始图片 */}
             <ImageModal.ImageVisual>
               <div
                 style={{
@@ -102,7 +100,7 @@ function ViewportSamAndUnsamForm({
                   <>
                     <img
                       src={urls[currentIndex]}
-                      alt="SAM Result"
+                      alt="SAM/UnSAM Result"
                       style={{
                         height: '100%',
                         width: '100%',
