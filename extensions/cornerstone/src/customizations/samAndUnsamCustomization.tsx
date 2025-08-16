@@ -100,7 +100,7 @@ function ViewportSamAndUnsamForm({
                   <>
                     <img
                       src={urls[currentIndex]}
-                      alt="SAM/UnSAM Result"
+                      alt="MedSAM/UnSAM Result"
                       style={{
                         height: '100%',
                         width: '100%',

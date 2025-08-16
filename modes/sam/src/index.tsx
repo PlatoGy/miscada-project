@@ -37,7 +37,7 @@ function modeFactory({ modeConfiguration }) {
   return {
     id,
     routeName: 'sam',
-    displayName: i18n.t('Modes:SAM Viewer'),
+    displayName: i18n.t('Modes:MedSAM Viewer'),
     /**
      * Lifecycle hooks
      */
@@ -146,7 +146,7 @@ function modeFactory({ modeConfiguration }) {
         modalitiesArray.length === 1
           ? !['SM', 'ECG', 'OT', 'DOC'].includes(modalitiesArray[0])
           : true,
-        description: 'SAM mode supports all modalities',
+        description: 'MedSAM mode supports all modalities',
       };
     },
     routes: [

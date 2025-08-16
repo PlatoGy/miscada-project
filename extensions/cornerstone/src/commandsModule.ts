@@ -934,7 +934,7 @@ function commandsModule({
           return React.createElement(
             'div',
             { style: { padding: 24, textAlign: 'center', color: '#fff' } }, 
-            React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select SAM prompt type'),
+            React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select MedSAM prompt type'),
             React.createElement(
               'div',
               { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
@@ -1026,8 +1026,8 @@ function commandsModule({
       } catch (e) {
         console.error(e);
         uiNotificationService.show({
-          title: 'SAM Error',
-          message: 'SAM upload failed',
+          title: 'MedSAM Error',
+          message: 'MedSAM upload failed',
           type: 'error',
         });
         if (loadingModalId && uiModalService) uiModalService.hide(loadingModalId);
@@ -1039,7 +1039,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to SAM Model',
+          title: 'Upload Segmentation Image to MedSAM Model',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,
@@ -1172,7 +1172,7 @@ function commandsModule({
       if (uiModalService) {
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
-          title: 'Upload Segmentation Image to SAM Model',
+          title: 'Upload Segmentation Image to MedSAM Model',
           contentProps: {
             activeViewportId,
             cornerstoneViewportService,

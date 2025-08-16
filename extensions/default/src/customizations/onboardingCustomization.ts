@@ -277,7 +277,7 @@ export default {
         {
           id: 'autoSegment',
           title: '2. Auto Segmentation',
-          text: 'You can choose an organ to apply the SAM model and automatically segment it.',
+          text: 'You can choose an organ to apply the MedSAM model and automatically segment it.',
           attachTo: {
             element: '[data-cy="AutoSegmentLiver"]',
             on: 'left',
@@ -287,7 +287,7 @@ export default {
         {
           id: 'storeOriginalSlice',
           title: '3. Store Original Slice',
-          text: 'If you want to Use SAM model on the slice with any annotations, you need to store the original slice first.',
+          text: 'If you want to Use MedSAM model on the slice with any annotations, you need to store the original slice first.',
           attachTo: {
             element: '[data-cy="StoreOriginSlice"]',
             on: 'left',
@@ -306,8 +306,8 @@ export default {
         },
         {
           id: 'applySam',
-          title: '5. SAM Segmentation',
-          text: 'Apply the SAM model to the annotations you have made.',
+          title: '5. MedSAM Segmentation',
+          text: 'Apply the MedSAM model to the annotations you have made.',
           attachTo: {
             element: '[data-cy="SAMApply"]',
             on: 'left',
