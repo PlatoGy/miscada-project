@@ -907,6 +907,8 @@ function commandsModule({
       const { activeViewportId } = viewportGridService.getState();
       const csViewport = cornerstoneViewportService.getCornerstoneViewport(activeViewportId);
 
+      const fmt = (s: number) => s.toFixed(2);
+
       if (!originSliceBlob) {
         uiNotificationService.show({
           title: 'Upload Image',
@@ -927,6 +929,9 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
+      // 仅统计“点选 Prompt -> 渲染完成”
+      let t_prompt_selected: number | null = null;
+
       const promptType = await new Promise<'points' | 'rectangle' | 'mask' | null>(resolve => {
         if (!uiModalService) return resolve(null);
 
@@ -944,6 +949,8 @@ function commandsModule({
                   {
                     key: type,
                     onClick: () => {
+                      // === 起点：点选 Prompt ===
+                      t_prompt_selected = performance.now() / 1000;
                       resolve(type as any);
                       uiModalService.hide(modalId);
                     },
@@ -956,7 +963,6 @@ function commandsModule({
           );
         };
 
-
         const modalId = uiModalService.show({
           title: 'Select Prompt Type',
           content: PromptSelector,
@@ -965,11 +971,9 @@ function commandsModule({
         });
       });
 
-      if (!promptType) {
-        return;
-      }
+      if (!promptType) return;
 
-      let loadingModalId = null;
+      let loadingModalId: any = null;
       if (uiModalService) {
         loadingModalId = uiModalService.show({
           title: '',
@@ -1009,13 +1013,13 @@ function commandsModule({
       const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
-        const routeMap = {
+        const routeMap: Record<'points' | 'rectangle' | 'mask', string> = {
           points: '/points',
           rectangle: '/segment',
           mask: '/mask', 
         };
-
         const route = routeMap[promptType];
+
         const resp = await fetch(`http://localhost:8000${route}`, {
           method: 'POST',
           body: formData,
@@ -1047,8 +1051,19 @@ function commandsModule({
           },
           containerClassName: 'min-w-[1150px] p-4',
         });
+
+        // === 终点：结果首帧渲染完成 ===
+        requestAnimationFrame(() => {
+          if (t_prompt_selected != null) {
+            const t_rendered = performance.now() / 1000;
+            const promptToRendered = t_rendered - t_prompt_selected;
+            console.log(`[Latency][Frontend] Prompt→Rendered = ${fmt(promptToRendered)} s`);
+          }
+        });
       }
     },
+
+
     autoSegmentLiver: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
@@ -1062,6 +1077,10 @@ function commandsModule({
       }
 
       const { uiModalService } = servicesManager.services;
+      const fmt = (s: number) => s.toFixed(2);
+
+      // 统计：点选 LIVER → 渲染完成
+      let t_prompt_selected: number | null = null;
 
       const organ = await new Promise<'liver' | null>(resolve => {
         if (!uiModalService) return resolve(null);
@@ -1070,11 +1089,7 @@ function commandsModule({
           return React.createElement(
             'div',
             { style: { padding: 24, textAlign: 'center', color: '#fff' } },
-            React.createElement(
-              'h3',
-              { style: { marginBottom: 16, fontSize: 18 } },
-              'Select Organ'
-            ),
+            React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select Organ'),
             React.createElement(
               'div',
               { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
@@ -1083,11 +1098,11 @@ function commandsModule({
                 {
                   key: 'liver',
                   onClick: () => {
+                    t_prompt_selected = performance.now() / 1000; // 起点：点选 LIVER
                     resolve('liver');
                     uiModalService.hide(modalId);
                   },
-                  className:
-                    'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
+                  className: 'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
                 },
                 'LIVER'
               )
@@ -1103,9 +1118,7 @@ function commandsModule({
         });
       });
 
-      if (!organ) {
-        return;
-      }
+      if (!organ) return;
 
       let loadingModalId = null;
       if (uiModalService) {
@@ -1121,9 +1134,7 @@ function commandsModule({
         });
       }
 
-      const divForUpload = document.querySelector(
-        `div[data-viewport-uid="${activeViewportId}"]`
-      );
+      const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
           title: 'Upload Image',
@@ -1136,9 +1147,7 @@ function commandsModule({
 
       const fileType = 'png';
       const canvas = await html2canvas(divForUpload as HTMLElement);
-      const blob: Blob = await new Promise(resolve =>
-        canvas.toBlob(resolve, `image/${fileType}`, 1.0)
-      );
+      const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
 
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
@@ -1146,15 +1155,9 @@ function commandsModule({
       const IMAGE_URL_PREFIX = 'http://localhost:8000';
       let samImageUrl = '';
       try {
-        const routeMap = {
-          liver: '/auto_liver',
-        };
-
+        const routeMap = { liver: '/auto_liver' };
         const route = routeMap[organ];
-        const resp = await fetch(`http://localhost:8000${route}`, {
-          method: 'POST',
-          body: formData,
-        });
+        const resp = await fetch(`http://localhost:8000${route}`, { method: 'POST', body: formData });
         const data = await resp.json();
         samImageUrl = IMAGE_URL_PREFIX + data.image_url;
       } catch (e) {
@@ -1173,15 +1176,21 @@ function commandsModule({
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
           title: 'Upload Segmentation Image to MedSAM Model',
-          contentProps: {
-            activeViewportId,
-            cornerstoneViewportService,
-            samImageUrl,
-          },
+          contentProps: { activeViewportId, cornerstoneViewportService, samImageUrl },
           containerClassName: 'min-w-[1150px] p-4',
+        });
+
+        // 终点：结果首帧渲染完成
+        requestAnimationFrame(() => {
+          if (t_prompt_selected != null) {
+            const t_rendered = performance.now() / 1000;
+            const promptToRendered = t_rendered - t_prompt_selected;
+            console.log(`[Latency][Frontend] Prompt→Rendered = ${fmt(promptToRendered)} s`);
+          }
         });
       }
     },
+
     showUnSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
@@ -1193,7 +1202,9 @@ function commandsModule({
         });
         return;
       }
+
       const { uiModalService } = servicesManager.services;
+      const fmt = (s: number) => s.toFixed(2);
 
       let loadingModalId = null;
       if (uiModalService) {
@@ -1209,9 +1220,7 @@ function commandsModule({
         });
       }
 
-      const divForUpload = document.querySelector(
-        `div[data-viewport-uid="${activeViewportId}"]`
-      );
+      const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
           title: 'Upload Image',
@@ -1228,14 +1237,15 @@ function commandsModule({
 
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
-      const IMAGE_URL_PREFIX = 'http://localhost:8008'; 
+      const IMAGE_URL_PREFIX = 'http://localhost:8008';
 
       let samImageUrl = '';
+      // 没有 prompt，这里改成：请求 → 渲染
+      let t_request_sent = 0;
+
       try {
-        const resp = await fetch('http://localhost:8008/unsam', {
-          method: 'POST',
-          body: formData,
-        });
+        t_request_sent = performance.now() / 1000; // 起点：发请求
+        const resp = await fetch('http://localhost:8008/unsam', { method: 'POST', body: formData });
         const data = await resp.json();
         samImageUrl = IMAGE_URL_PREFIX + data.image_url;
       } catch (e) {
@@ -1254,15 +1264,20 @@ function commandsModule({
         uiModalService.show({
           content: CornerstoneSamAndUnsamForm,
           title: 'Upload Segmentation Image to UnSAM Model(Whole Image Segmentation)',
-          contentProps: {
-            activeViewportId,
-            cornerstoneViewportService,
-            samImageUrl, 
-          },
+          contentProps: { activeViewportId, cornerstoneViewportService, samImageUrl },
           containerClassName: 'min-w-[1150px] p-4',
+        });
+
+        requestAnimationFrame(() => {
+          if (t_request_sent > 0) {
+            const t_rendered = performance.now() / 1000;
+            const reqToRendered = t_rendered - t_request_sent;
+            console.log(`[Latency][Frontend] Request→Rendered = ${fmt(reqToRendered)} s`);
+          }
         });
       }
     },
+
     showPointUnSAMUploadModal: async () => {
       const { activeViewportId } = viewportGridService.getState();
 
@@ -1276,6 +1291,10 @@ function commandsModule({
       }
 
       const { uiModalService } = servicesManager.services;
+      const fmt = (s: number) => s.toFixed(2);
+
+      // 统计：点选 LIVER → 渲染完成
+      let t_prompt_selected: number | null = null;
 
       const organ = await new Promise<'liver' | null>(resolve => {
         if (!uiModalService) return resolve(null);
@@ -1284,11 +1303,7 @@ function commandsModule({
           React.createElement(
             'div',
             { style: { padding: 24, textAlign: 'center', color: '#fff' } },
-            React.createElement(
-              'h3',
-              { style: { marginBottom: 16, fontSize: 18 } },
-              'Select Organ'
-            ),
+            React.createElement('h3', { style: { marginBottom: 16, fontSize: 18 } }, 'Select Organ'),
             React.createElement(
               'div',
               { style: { display: 'flex', justifyContent: 'center', gap: 12 } },
@@ -1297,11 +1312,11 @@ function commandsModule({
                 {
                   key: 'liver',
                   onClick: () => {
+                    t_prompt_selected = performance.now() / 1000; // 起点：点选 LIVER
                     resolve('liver');
                     uiModalService.hide(modalId);
                   },
-                  className:
-                    'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
+                  className: 'bg-blue-500 hover:bg-blue-600 text-white font-medium py-1 px-3 rounded text-sm',
                 },
                 'LIVER'
               )
@@ -1316,9 +1331,7 @@ function commandsModule({
         });
       });
 
-      if (!organ) {
-        return;
-      }
+      if (!organ) return;
 
       // show loading modal
       let loadingModalId = null;
@@ -1335,9 +1348,7 @@ function commandsModule({
         });
       }
 
-      const divForUpload = document.querySelector(
-        `div[data-viewport-uid="${activeViewportId}"]`
-      );
+      const divForUpload = document.querySelector(`div[data-viewport-uid="${activeViewportId}"]`);
       if (!divForUpload) {
         uiNotificationService.show({
           title: 'Upload Image',
@@ -1350,20 +1361,16 @@ function commandsModule({
 
       const fileType = 'png';
       const canvas = await html2canvas(divForUpload as HTMLElement);
-      const blob: Blob = await new Promise(resolve =>
-        canvas.toBlob(resolve, `image/${fileType}`, 1.0)
-      );
+      const blob: Blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${fileType}`, 1.0));
 
       const formData = new FormData();
       formData.append('file', blob, `image.${fileType}`);
       formData.append('organ', organ);
+
       const IMAGE_URL_PREFIX = 'http://localhost:8008';
       let segmentationUrls: string[] = [];
       try {
-        const resp = await fetch('http://localhost:8008/point_unsam', {
-          method: 'POST',
-          body: formData,
-        });
+        const resp = await fetch('http://localhost:8008/point_unsam', { method: 'POST', body: formData });
         const data = await resp.json();
         const results = data.segmentation_results || [];
         segmentationUrls = results.map((url: string) => IMAGE_URL_PREFIX + url);
@@ -1390,8 +1397,18 @@ function commandsModule({
           },
           containerClassName: 'min-w-[1150px] p-4',
         });
+
+        // 终点：结果首帧渲染完成
+        requestAnimationFrame(() => {
+          if (t_prompt_selected != null) {
+            const t_rendered = performance.now() / 1000;
+            const promptToRendered = t_rendered - t_prompt_selected;
+            console.log(`[Latency][Frontend] Prompt→Rendered = ${fmt(promptToRendered)} s`);
+          }
+        });
       }
     },
+
     rotateViewport: ({ rotation }) => {
       const enabledElement = _getActiveViewportEnabledElement();
       if (!enabledElement) {
