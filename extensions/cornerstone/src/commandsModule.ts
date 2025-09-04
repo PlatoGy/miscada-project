@@ -929,7 +929,7 @@ function commandsModule({
 
       const { uiModalService } = servicesManager.services;
 
-      // 仅统计“点选 Prompt -> 渲染完成”
+      // Only count "Select Prompt -> Render Completed".
       let t_prompt_selected: number | null = null;
 
       const promptType = await new Promise<'points' | 'rectangle' | 'mask' | null>(resolve => {
@@ -949,7 +949,7 @@ function commandsModule({
                   {
                     key: type,
                     onClick: () => {
-                      // === 起点：点选 Prompt ===
+                      // === Starting point: Select Prompt ===
                       t_prompt_selected = performance.now() / 1000;
                       resolve(type as any);
                       uiModalService.hide(modalId);
@@ -1052,7 +1052,7 @@ function commandsModule({
           containerClassName: 'min-w-[1150px] p-4',
         });
 
-        // === 终点：结果首帧渲染完成 ===
+       // === Endpoint: The first frame of the result has been rendered successfully ===
         requestAnimationFrame(() => {
           if (t_prompt_selected != null) {
             const t_rendered = performance.now() / 1000;
@@ -1079,7 +1079,7 @@ function commandsModule({
       const { uiModalService } = servicesManager.services;
       const fmt = (s: number) => s.toFixed(2);
 
-      // 统计：点选 LIVER → 渲染完成
+      // Statistics: Select LIVER → Render completed
       let t_prompt_selected: number | null = null;
 
       const organ = await new Promise<'liver' | null>(resolve => {
@@ -1098,7 +1098,7 @@ function commandsModule({
                 {
                   key: 'liver',
                   onClick: () => {
-                    t_prompt_selected = performance.now() / 1000; // 起点：点选 LIVER
+                    t_prompt_selected = performance.now() / 1000; // Starting point: Select LIVER
                     resolve('liver');
                     uiModalService.hide(modalId);
                   },
@@ -1180,7 +1180,7 @@ function commandsModule({
           containerClassName: 'min-w-[1150px] p-4',
         });
 
-        // 终点：结果首帧渲染完成
+        // Endpoint: The first frame of the result has been rendered successfully
         requestAnimationFrame(() => {
           if (t_prompt_selected != null) {
             const t_rendered = performance.now() / 1000;
@@ -1240,11 +1240,10 @@ function commandsModule({
       const IMAGE_URL_PREFIX = 'http://localhost:8008';
 
       let samImageUrl = '';
-      // 没有 prompt，这里改成：请求 → 渲染
       let t_request_sent = 0;
 
       try {
-        t_request_sent = performance.now() / 1000; // 起点：发请求
+        t_request_sent = performance.now() / 1000; 
         const resp = await fetch('http://localhost:8008/unsam', { method: 'POST', body: formData });
         const data = await resp.json();
         samImageUrl = IMAGE_URL_PREFIX + data.image_url;
@@ -1293,7 +1292,7 @@ function commandsModule({
       const { uiModalService } = servicesManager.services;
       const fmt = (s: number) => s.toFixed(2);
 
-      // 统计：点选 LIVER → 渲染完成
+      // Statistics: Select LIVER → Render completed
       let t_prompt_selected: number | null = null;
 
       const organ = await new Promise<'liver' | null>(resolve => {
@@ -1312,7 +1311,7 @@ function commandsModule({
                 {
                   key: 'liver',
                   onClick: () => {
-                    t_prompt_selected = performance.now() / 1000; // 起点：点选 LIVER
+                    t_prompt_selected = performance.now() / 1000; // Starting point: Select LIVER
                     resolve('liver');
                     uiModalService.hide(modalId);
                   },
@@ -1398,7 +1397,7 @@ function commandsModule({
           containerClassName: 'min-w-[1150px] p-4',
         });
 
-        // 终点：结果首帧渲染完成
+        // Endpoint: The first frame of the result has been rendered successfully
         requestAnimationFrame(() => {
           if (t_prompt_selected != null) {
             const t_rendered = performance.now() / 1000;
