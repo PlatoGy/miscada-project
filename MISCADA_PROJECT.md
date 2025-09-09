@@ -10,7 +10,7 @@ docker-compose up -d
 2. Run OHIF Viewer with Yarn
 
 ```bash
-cd Viewers
+cd OHIF
 yarn config set workspaces-experimental true
 yarn install
 yarn run dev:orthanc
